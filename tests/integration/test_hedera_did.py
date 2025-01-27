@@ -60,7 +60,7 @@ class TestHederaDid:
             did = await create_and_register_new_did(client_provider)
             assert did.topic_id
 
-            expected_identifier = f"did:hedera:testnet:{multibase_encode(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw()), 'base58btc')}_{did.topic_id}"
+            expected_identifier = f"did:hedera:testnet:{multibase_encode(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw()), "base58btc")}_{did.topic_id}"
 
             assert bool(TOPIC_REGEX.match(did.topic_id))
             assert did.identifier == expected_identifier

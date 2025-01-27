@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import Literal, TypeAlias
+from typing import Literal
 
 from .models import AnonCredsCredDef, AnonCredsRevList, AnonCredsRevRegDef, AnonCredsSchema
 
-ObjectState: TypeAlias = Literal["finished", "failed", "action", "wait"]
+ObjectState = Literal["finished", "failed", "action", "wait"]
 
 
 @dataclass(frozen=True)

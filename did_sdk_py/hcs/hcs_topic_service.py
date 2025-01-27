@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import TypeAlias
 
 from hedera import (
     Hbar,
@@ -16,7 +15,7 @@ from ..hedera_client_provider import HederaClientProvider
 from .constants import MAX_TRANSACTION_FEE
 from .utils import execute_hcs_query_async, execute_hcs_transaction_async, sign_hcs_transaction_async
 
-TopicTransaction: TypeAlias = TopicCreateTransaction | TopicUpdateTransaction
+TopicTransaction: type = TopicCreateTransaction | TopicUpdateTransaction
 
 
 @dataclass(frozen=True)

@@ -1,8 +1,8 @@
 import logging
 import re
-from typing import Literal, TypeAlias
+from typing import Literal
 
-LogLevel: TypeAlias = Literal["DEBUG", "INFO", "WARN", "ERROR"]
+LogLevel = Literal["DEBUG", "INFO", "WARN", "ERROR"]
 
 
 def configure_logger(logger, log_level: LogLevel | None, log_format: str | None):

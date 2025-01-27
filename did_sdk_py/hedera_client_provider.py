@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Literal, TypeAlias
+from typing import Literal
 
 from hedera import AccountId, Client, PrivateKey
 
 from .utils.serializable import Serializable
 
-NetworkName: TypeAlias = Literal["mainnet", "testnet", "previewnet"]
+NetworkName = Literal["mainnet", "testnet", "previewnet"]
 
 
 @dataclass(frozen=True)
