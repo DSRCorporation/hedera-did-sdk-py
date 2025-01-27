@@ -18,7 +18,7 @@ Documentation:
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.12+
 - [Poetry](https://python-poetry.org/) (at least 1.8.4)
 - NodeJS and npm (used by pre-commit hooks)
 - JDK 21 (required for Hedera Python SDK which is a wrapper around Java SDK)

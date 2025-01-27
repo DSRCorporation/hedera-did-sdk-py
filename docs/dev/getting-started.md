@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.12+
 - JDK 21 (required for Hedera Python SDK which is a wrapper around Java SDK)
     - The Temurin builds of [Eclipse Adoptium](https://adoptium.net/) are strongly recommended
     - IMPORTANT: Java environment setup significantly impacts Python <-> Java interop stability, please consider using
