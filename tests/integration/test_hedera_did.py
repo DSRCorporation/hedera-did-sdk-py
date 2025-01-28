@@ -3,7 +3,8 @@ import re
 from typing import cast
 
 import pytest
-from hedera import PrivateKey, PublicKey
+from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python.crypto.public_key import PublicKey
 
 from did_sdk_py import DidException, HederaClientProvider, HederaDid
 from did_sdk_py.did.hcs import HcsDidMessageEnvelope
@@ -18,7 +19,7 @@ TOPIC_REGEX = re.compile(r"^0\.0\.[0-9]{3,}")
 VALID_DID = "did:hedera:testnet:z6MkgUv5CvjRP6AsvEYqSRN7djB6p4zK9bcMQ93g5yK6Td7N_0.0.29613327"
 
 VERIFICATION_PUBLIC_KEY_BASE58 = "87meAWt7t2zrDxo7qw3PVTjexKWReYWS75LH29THy8kb"
-VERIFICATION_PUBLIC_KEY = PublicKey.fromBytes(b58_to_bytes(VERIFICATION_PUBLIC_KEY_BASE58))
+VERIFICATION_PUBLIC_KEY = b58_to_bytes(VERIFICATION_PUBLIC_KEY_BASE58)
 VERIFICATION_PUBLIC_KEY_DER = VERIFICATION_PUBLIC_KEY.toStringDER()
 VERIFICATION_PUBLIC_KEY_TYPE = "Ed25519VerificationKey2018"
 VERIFICATION_ID = f"did:hedera:testnet:z{VERIFICATION_PUBLIC_KEY_BASE58}_0.0.29617801#key-1"
@@ -60,11 +61,11 @@ class TestHederaDid:
             did = await create_and_register_new_did(client_provider)
             assert did.topic_id
 
-            expected_identifier = f"did:hedera:testnet:{multibase_encode(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw()), "base58btc")}_{did.topic_id}"
+            expected_identifier = f"did:hedera:testnet:{multibase_encode(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw()), 'base58btc')}_{did.topic_id}"
 
             assert bool(TOPIC_REGEX.match(did.topic_id))
             assert did.identifier == expected_identifier
-            assert cast(PrivateKey, did._private_key).toStringDER() == OPERATOR_KEY.toStringDER()
+            assert cast(PrivateKey, did._private_key).to_string() == OPERATOR_KEY.to_string()
             assert did.network == "testnet"
 
             # Wait until changes are propagated to Hedera Mirror node
@@ -206,16 +207,16 @@ class TestHederaDid:
 
             with pytest.raises(DidException, match="DID is not registered"):
                 await did.change_owner(
-                    controller=self.NEW_OWNER_ID, new_private_key_der=PrivateKey.generateECDSA().toStringDER()
+                    controller=self.NEW_OWNER_ID, new_private_key_der=PrivateKey.generate_ecdsa().to_string()
                 )
 
         async def test_throws_on_missing_private_key(self, client_provider: HederaClientProvider):
             """Throws error if private key is not provided"""
             did = HederaDid(client_provider=client_provider, identifier=VALID_DID)
 
-            new_private_key = PrivateKey.generateECDSA()
+            new_private_key = PrivateKey.generate_ecdsa()
             with pytest.raises(DidException, match="Private key is required to submit DID event transaction"):
-                await did.change_owner(controller=self.NEW_OWNER_ID, new_private_key_der=new_private_key.toStringDER())
+                await did.change_owner(controller=self.NEW_OWNER_ID, new_private_key_der=new_private_key.to_string())
 
         async def test_changes_document_owner(self, client_provider: HederaClientProvider):
             """Changes the owner of the document"""
@@ -225,9 +226,9 @@ class TestHederaDid:
             # Wait until changes are propagated to Hedera Mirror node
             await asyncio.sleep(5)
 
-            new_private_key = PrivateKey.generateECDSA()
+            new_private_key = PrivateKey.generate_ecdsa()
             new_private_key_type = get_key_type(new_private_key)
-            await did.change_owner(controller=self.NEW_OWNER_ID, new_private_key_der=new_private_key.toStringDER())
+            await did.change_owner(controller=self.NEW_OWNER_ID, new_private_key_der=new_private_key.to_string())
 
             # Wait until changes are propagated to Hedera Mirror node
             await asyncio.sleep(5)
@@ -245,7 +246,7 @@ class TestHederaDid:
                     {
                         "controller": self.NEW_OWNER_ID,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(new_private_key.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(new_private_key.public_key().to_bytes_raw())),
                         "type": new_private_key_type,
                     },
                 ],
@@ -621,7 +622,7 @@ class TestHederaDid:
             await did.update_verification_method(
                 id_=VERIFICATION_ID,
                 controller=did.identifier,
-                public_key_der=updated_public_key.toStringDER(),
+                public_key_der=updated_public_key.to_string(),
                 type_=updated_public_key_type,
             )
 

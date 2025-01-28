@@ -1,21 +1,17 @@
 from dataclasses import dataclass
 
-from hedera import (
-    Hbar,
-    PrivateKey,
-    PublicKey,
-    TopicCreateTransaction,
-    TopicId,
-    TopicInfo,
-    TopicInfoQuery,
-    TopicUpdateTransaction,
-)
+from hedera_sdk_python.consensus.topic_create_transaction import TopicCreateTransaction
+from hedera_sdk_python.consensus.topic_id import TopicId
+from hedera_sdk_python.consensus.topic_info import TopicInfo
+from hedera_sdk_python.consensus.topic_update_transaction import TopicUpdateTransaction
+from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python.crypto.public_key import PublicKey
+from hedera_sdk_python.query.topic_info_query import TopicInfoQuery
 
 from ..hedera_client_provider import HederaClientProvider
-from .constants import MAX_TRANSACTION_FEE
 from .utils import execute_hcs_query_async, execute_hcs_transaction_async, sign_hcs_transaction_async
 
-TopicTransaction: type = TopicCreateTransaction | TopicUpdateTransaction
+TopicTransaction = TopicCreateTransaction | TopicUpdateTransaction
 
 
 @dataclass(frozen=True)
@@ -28,15 +24,18 @@ class HcsTopicOptions:
 
 def _set_topic_transaction_options(transaction: TopicTransaction, topic_options: HcsTopicOptions) -> TopicTransaction:
     if topic_options.admin_key:
-        transaction.setAdminKey(topic_options.admin_key)
+        transaction.set_admin_key(topic_options.admin_key)
 
     if topic_options.topic_memo:
-        transaction.setTopicMemo(topic_options.topic_memo)
+        transaction.set_memo(topic_options.topic_memo)
 
-    max_transaction_fee = (
-        Hbar(topic_options.max_transaction_fee_hbar) if topic_options.max_transaction_fee_hbar else MAX_TRANSACTION_FEE
-    )
-    transaction.setSubmitKey(topic_options.submit_key).setMaxTransactionFee(max_transaction_fee)
+    # max_transaction_fee = (
+    #     Hbar(topic_options.max_transaction_fee_hbar) if topic_options.max_transaction_fee_hbar else MAX_TRANSACTION_FEE
+    # )
+
+    # FIXME: Find a way to properly set transaction fee
+    # transaction.transaction_fee = max_transaction_fee
+    transaction.set_submit_key(topic_options.submit_key)
 
     return transaction
 
@@ -46,19 +45,19 @@ class HcsTopicService:
         self._client = client_provider.get_client()
 
     async def create_topic(self, topic_options: HcsTopicOptions, signing_keys: list[PrivateKey]) -> str:
-        transaction = _set_topic_transaction_options(TopicCreateTransaction(), topic_options).freezeWith(self._client)
+        transaction = _set_topic_transaction_options(TopicCreateTransaction(), topic_options).freeze_with(self._client)
 
         signed_transaction = await sign_hcs_transaction_async(transaction, signing_keys)
         transaction_receipt = await execute_hcs_transaction_async(signed_transaction, self._client)
 
-        return transaction_receipt.topicId.toString()
+        return str(transaction_receipt.topicId)
 
     async def update_topic(self, topic_id: str, topic_options: HcsTopicOptions, signing_keys: list[PrivateKey]):
         transaction = _set_topic_transaction_options(
-            TopicUpdateTransaction().setTopicId(TopicId.fromString(topic_id)), topic_options
-        ).freezeWith(self._client)
+            TopicUpdateTransaction(topic_id=TopicId.from_string(topic_id)), topic_options
+        ).freeze_with(self._client)
         signed_transaction = await sign_hcs_transaction_async(transaction, signing_keys)
         await execute_hcs_transaction_async(signed_transaction, self._client)
 
     async def get_topic_info(self, topic_id: str) -> TopicInfo:
-        return await execute_hcs_query_async(TopicInfoQuery().setTopicId(TopicId.fromString(topic_id)), self._client)
+        return await execute_hcs_query_async(TopicInfoQuery(topic_id=TopicId.from_string(topic_id)), self._client)

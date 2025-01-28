@@ -49,7 +49,7 @@ def mock_hcs_topic_service(mocker: MockerFixture):
 
     mock_hsc_topic_service = MockHcsTopicService.return_value
     mock_hsc_topic_service.create_topic.return_value = MOCK_TOPIC_ID
-    mock_hsc_topic_service.get_topic_info.return_value.topicMemo = MOCK_TOPIC_MEMO
+    mock_hsc_topic_service.get_topic_info.return_value.memo = MOCK_TOPIC_MEMO
 
     return mock_hsc_topic_service
 
@@ -135,7 +135,7 @@ class TestHcsFileService:
         service = HcsFileService(mock_client_provider)
         with pytest.raises(
             Exception,
-            match='Invalid ID "invalid_topic_id": format should look like 0.0.123 or 0.0.123-vfmkw java.lang.IllegalArgumentException',
+            match="Invalid TopicId format. Expected 'shard.realm.num'",
         ):
             await service.resolve_file("invalid_topic_id")
 
@@ -145,7 +145,7 @@ class TestHcsFileService:
     async def test_throws_on_resolving_invalid_topic_memo(
         self, mock_client_provider: HederaClientProvider, mock_hcs_topic_service, mock_hcs_message_resolver
     ):
-        mock_hcs_topic_service.get_topic_info.return_value.topicMemo = "invalid_topic_memo"
+        mock_hcs_topic_service.get_topic_info.return_value.memo = "invalid_topic_memo"
 
         service = HcsFileService(mock_client_provider)
         with pytest.raises(

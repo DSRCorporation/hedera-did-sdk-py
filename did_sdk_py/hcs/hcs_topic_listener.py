@@ -1,10 +1,13 @@
 import logging
 from collections.abc import Callable
 
-from hedera import Client, JDuration, MirrorResponse, PyConsumer, TopicId, TopicMessageQuery
+from hedera_sdk_python.client.client import Client
+from hedera_sdk_python.consensus.topic_id import TopicId
+from hedera_sdk_python.consensus.topic_message import TopicMessage
+from hedera_sdk_python.query.topic_message_query import TopicMessageQuery
+from hedera_sdk_python.timestamp import Timestamp
 
-from ..utils.pyjnius import ErrorHandlerBiConsumer, Runnable
-from ..utils.timestamp import Timestamp
+from ..utils.pyjnius import Runnable
 from .hcs_message import HcsMessage, HcsMessageWithResponseMetadata
 
 LOGGER = logging.getLogger(__name__)
@@ -23,63 +26,58 @@ class HcsTopicListener:
         self._filters = []
         self._subscription_handle = None
         self._invalid_message_handler = None
-
-        # IMPORTANT
-        # We need to store 'PythonJavaClass' reference as long as it can be used by Java to prevent it being cleaned up by Python GC
-        # Otherwise, intermittent segmentation faults and other hard-to-debug issues are possible
-        self._java_consumer_reference: PyConsumer | None = None
+        self._error_handler = None
 
         self._query = (
-            TopicMessageQuery()
-            .setTopicId(TopicId.fromString(topic_id))
-            .setStartTime((Timestamp(0, 0)).to_jinstant())
-            .setMaxBackoff(JDuration.ofMillis(2000))
-            .setMaxAttempts(5)
+            TopicMessageQuery(topic_id=TopicId.from_string(topic_id), start_time=Timestamp(0, 0).to_date())
+            # Not implemented in native SDK
+            # .setMaxBackoff(JDuration.ofMillis(2000))
+            # .setMaxAttempts(5)
         )
 
     def set_start_time(self, start_time: Timestamp):
-        self._query.setStartTime(start_time.to_jinstant())
+        self._query.set_start_time(start_time.to_date())
         return self
 
     def set_end_time(self, end_time: Timestamp):
-        self._query.setEndTime(end_time.to_jinstant())
+        self._query.set_end_time(end_time.to_date())
         return self
 
     def set_limit(self, limit: int):
-        self._query.setLimit(limit)
+        self._query.set_limit(limit)
         return self
 
     def set_completion_handler(self, completion_handler: Runnable):
-        self._query.setCompletionHandler(completion_handler)
+        # Not implemented in native SDK
+        # self._query.setCompletionHandler(completion_handler)
         return self
 
-    def add_filter(self, response_filter: Callable[[MirrorResponse], bool]):
+    def add_filter(self, response_filter: Callable[[TopicMessage], bool]):
         self._filters.append(response_filter)
         return self
 
-    def set_error_handler(self, error_handler: ErrorHandlerBiConsumer):
-        self._query.setErrorHandler(error_handler)
-        return self
-
-    def set_invalid_message_handler(self, invalid_message_handler: Callable[[MirrorResponse, str], None]):
+    def set_invalid_message_handler(self, invalid_message_handler: Callable[[TopicMessage, str], None]):
         self._invalid_message_handler = invalid_message_handler
         return self
 
-    def subscribe(self, client: Client, receiver: Callable[[HcsMessage | HcsMessageWithResponseMetadata], None]):
+    def subscribe(
+        self,
+        client: Client,
+        receiver: Callable[[HcsMessage | HcsMessageWithResponseMetadata], None],
+        error_handler: Callable[[Exception], None] | None = None,
+    ):
         def handle_message(response):
             self._handle_response(response, receiver)
 
-        self._java_consumer_reference = PyConsumer(handle_message)
-
-        self._subscription_handle = self._query.subscribe(client, self._java_consumer_reference)
+        # Subscription handle is not actually implemented in native SDK
+        self._subscription_handle = self._query.subscribe(client, handle_message, error_handler)
 
     def unsubscribe(self):
         if self._subscription_handle:
             self._subscription_handle.unsubscribe()
-        self._java_consumer_reference = None
 
     def _handle_response(
-        self, response: MirrorResponse, receiver: Callable[[HcsMessage | HcsMessageWithResponseMetadata], None]
+        self, response: TopicMessage, receiver: Callable[[HcsMessage | HcsMessageWithResponseMetadata], None]
     ):
         if len(self._filters) > 0:
             for response_filter in self._filters:
@@ -101,19 +99,19 @@ class HcsTopicListener:
                 HcsMessageWithResponseMetadata(
                     message=message,
                     sequence_number=response.sequence_number,
-                    consensus_timestamp=Timestamp.from_jinstant(response.timestamp),
+                    consensus_timestamp=Timestamp.from_date(response.consensus_timestamp),
                 )
             )
         else:
             receiver(message)
 
-    def _extract_message(self, response: MirrorResponse) -> HcsMessage | None:
+    def _extract_message(self, response: TopicMessage) -> HcsMessage | None:
         try:
-            return self._message_class.from_json(response.contents)
+            return self._message_class.from_json(response.message.decode())
         except Exception as error:
             LOGGER.warning(f"Failed to extract HCS message from response: {error!s}")
 
-    def _report_invalid_message(self, response: MirrorResponse, reason: str):
-        LOGGER.warning(f"Got invalid message: {response.contents}, reason: {reason}")
+    def _report_invalid_message(self, response: TopicMessage, reason: str):
+        LOGGER.warning(f"Got invalid message: {response.message.decode()}, reason: {reason}")
         if self._invalid_message_handler:
             self._invalid_message_handler(response, reason)

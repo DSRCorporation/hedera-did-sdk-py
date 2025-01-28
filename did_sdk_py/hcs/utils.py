@@ -1,7 +1,11 @@
 import asyncio
 from typing import Any
 
-from hedera import Client, PrivateKey, Query, Transaction, TransactionReceipt
+from hedera_sdk_python.client.client import Client
+from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python.query.query import Query
+from hedera_sdk_python.transaction.transaction import Transaction
+from hedera_sdk_python.transaction.transaction_receipt import TransactionReceipt
 
 
 async def sign_hcs_transaction_async(transaction: Transaction, signing_keys: list[PrivateKey]) -> Transaction:
@@ -18,13 +22,8 @@ async def sign_hcs_transaction_async(transaction: Transaction, signing_keys: lis
 
 
 async def execute_hcs_transaction_async(transaction: Transaction, client: Client) -> TransactionReceipt:
-    def execute_transaction():
-        transaction_response = transaction.execute(client)
-        return transaction_response.getReceipt(client)
-
-    execution_task = asyncio.create_task(asyncio.to_thread(execute_transaction))
+    execution_task = asyncio.create_task(asyncio.to_thread(lambda: transaction.execute(client)))
     await execution_task
-
     return execution_task.result()
 
 

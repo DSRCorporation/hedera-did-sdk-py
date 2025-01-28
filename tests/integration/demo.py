@@ -3,7 +3,7 @@ import json
 import time
 
 import pytest
-from hedera import PrivateKey
+from hedera_sdk_python.crypto.private_key import PrivateKey
 
 from did_sdk_py import (
     AnonCredsCredDef,
@@ -59,8 +59,8 @@ DEMO_REV_LIST_ACCUM = "21 1200126E528235C2C22071C3F573985E6E07F49217414A0490482B
 class TestDemo:
     async def test_demo(self, client_provider: HederaClientProvider):
         # Create issuer private key and register Hedera DID
-        issuer_private_key = PrivateKey.generateECDSA()
-        issuer_did = HederaDid(client_provider=client_provider, private_key_der=issuer_private_key.toStringDER())
+        issuer_private_key = PrivateKey.generate_ecdsa()
+        issuer_did = HederaDid(client_provider=client_provider, private_key_der=issuer_private_key.to_string())
 
         await issuer_did.register()
 
@@ -78,13 +78,13 @@ class TestDemo:
             service_endpoint="https://example.com/vcs",
         )
 
-        verification_key = PrivateKey.generateECDSA()
+        verification_key = PrivateKey.generate_ecdsa()
 
         # Add DID Document Verification Method
         await issuer_did.add_verification_method(
             id_=f"{issuer_did.identifier}#key-1",
             controller=issuer_did.identifier,
-            public_key_der=verification_key.getPublicKey().toStringDER(),
+            public_key_der=verification_key.public_key().to_string(),
             type_="EcdsaSecp256k1VerificationKey2019",
         )
 
@@ -119,7 +119,7 @@ class TestDemo:
 
         print("Registering AnonCreds schema...")
 
-        schema_registration_result = await anoncreds_registry.register_schema(schema, issuer_private_key.toStringDER())
+        schema_registration_result = await anoncreds_registry.register_schema(schema, issuer_private_key.to_string())
         assert schema_registration_result.schema_state.state == "finished"
 
         schema_identifier = schema_registration_result.schema_state.schema_id

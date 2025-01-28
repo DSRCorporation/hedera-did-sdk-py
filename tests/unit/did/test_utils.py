@@ -92,7 +92,7 @@ class TestUtils:
 
     def test_parse_valid_identifier_from_private_key(self):
         """should parse from string and provide HcsDid object"""
-        public_key_bytes = bytes(PRIVATE_KEY.getPublicKey().toBytes())
+        public_key_bytes = bytes(PRIVATE_KEY.public_key().to_bytes_raw())
         base58_btc_encoded_string = multibase_encode(public_key_bytes, "base58btc")
 
         identifier = f"did:hedera:testnet:{base58_btc_encoded_string}_0.0.1"

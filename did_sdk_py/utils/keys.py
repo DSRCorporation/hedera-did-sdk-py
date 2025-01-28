@@ -1,14 +1,13 @@
-from hedera import PrivateKey, PublicKey
+from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python.crypto.public_key import PublicKey
 
 from ..did.types import SupportedKeyType
 
 
-def get_key_type(private_key: PrivateKey | PublicKey) -> SupportedKeyType:
-    if private_key.isED25519():
+def get_key_type(key: PrivateKey | PublicKey) -> SupportedKeyType:
+    if key.is_ed25519():
         return "Ed25519VerificationKey2018"
-
-    elif private_key.isECDSA():
+    elif key.is_ecdsa():
         return "EcdsaSecp256k1VerificationKey2019"
-
     else:
         raise Exception("Unknown key type")

@@ -3,7 +3,8 @@ from hashlib import sha256
 from pathlib import Path
 
 import pytest
-from hedera import TopicId, TopicInfoQuery
+from hedera_sdk_python.consensus.topic_id import TopicId
+from hedera_sdk_python.query.topic_info_query import TopicInfoQuery
 
 from did_sdk_py import HederaClientProvider
 from did_sdk_py.hcs import HcsFileChunkMessage, HcsFileService, HcsMessageResolver, execute_hcs_query_async
@@ -30,7 +31,7 @@ class TestHcsFileService:
         await asyncio.sleep(5)
 
         topic_info = await execute_hcs_query_async(
-            TopicInfoQuery().setTopicId(TopicId.fromString(topic_id)), client_provider.get_client()
+            TopicInfoQuery(topic_id=TopicId.from_string(topic_id)), client_provider.get_client()
         )
         topic_messages = await HcsMessageResolver(topic_id, HcsFileChunkMessage).execute(client_provider.get_client())
 
@@ -51,7 +52,7 @@ class TestHcsFileService:
         assert resolved_payload
 
         topic_info = await execute_hcs_query_async(
-            TopicInfoQuery().setTopicId(TopicId.fromString(topic_id)), client_provider.get_client()
+            TopicInfoQuery(topic_id=TopicId.from_string(topic_id)), client_provider.get_client()
         )
         topic_file_hash, _, _ = topic_info.topicMemo.split(":")
 

@@ -1,4 +1,4 @@
-from hedera import PrivateKey
+from hedera_sdk_python.crypto.private_key import PrivateKey
 
 from did_sdk_py.utils.encoding import multibase_encode
 
@@ -10,9 +10,9 @@ PRIVATE_KEY = PrivateKey.generate()
 
 PRIVATE_KEY_2 = PrivateKey.generate()
 
-PUBLIC_KEY_DER = multibase_encode(bytes(PRIVATE_KEY.getPublicKey().toBytes()), "base58btc")
+PUBLIC_KEY_DER = multibase_encode(bytes(PRIVATE_KEY.public_key().to_bytes_raw()), "base58btc")
 
-PUBLIC_KEY_DER_2 = multibase_encode(bytes(PRIVATE_KEY_2.getPublicKey().toBytes()), "base58btc")
+PUBLIC_KEY_DER_2 = multibase_encode(bytes(PRIVATE_KEY_2.public_key().to_bytes_raw()), "base58btc")
 
 IDENTIFIER = f"did:hedera:{NETWORK}:{PUBLIC_KEY_DER}_{DID_TOPIC_ID_1}"
 IDENTIFIER_2 = f"did:hedera:testnet:{PUBLIC_KEY_DER_2}_{DID_TOPIC_ID_3}"

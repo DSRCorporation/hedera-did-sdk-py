@@ -13,7 +13,7 @@ class TestHcsDidMessage:
         """Test valid message"""
         did = HederaDid(
             identifier=IDENTIFIER,
-            private_key_der=test_key.private_key.toStringDER(),
+            private_key_der=test_key.private_key.to_string(),
             client_provider=mock_client_provider,
         )
 
@@ -23,7 +23,7 @@ class TestHcsDidMessage:
             HcsDidUpdateDidOwnerEvent(
                 f"{did.identifier}#did-root-key",
                 cast(str, did.identifier),
-                test_key.private_key.getPublicKey(),
+                test_key.private_key.public_key(),
                 test_key.key_type,
             ),
         )
@@ -34,7 +34,7 @@ class TestHcsDidMessage:
         """Test Invalid Did"""
         did = HederaDid(
             identifier=IDENTIFIER,
-            private_key_der=test_key.private_key.toStringDER(),
+            private_key_der=test_key.private_key.to_string(),
             client_provider=mock_client_provider,
         )
 
@@ -44,7 +44,7 @@ class TestHcsDidMessage:
             HcsDidUpdateDidOwnerEvent(
                 f"{did.identifier}#did-root-key",
                 cast(str, did.identifier),
-                test_key.private_key.getPublicKey(),
+                test_key.private_key.public_key(),
                 test_key.key_type,
             ),
         )
@@ -55,7 +55,7 @@ class TestHcsDidMessage:
         """Test Invalid Topic"""
         did = HederaDid(
             identifier=IDENTIFIER,
-            private_key_der=test_key.private_key.toStringDER(),
+            private_key_der=test_key.private_key.to_string(),
             client_provider=mock_client_provider,
         )
 
@@ -65,7 +65,7 @@ class TestHcsDidMessage:
             HcsDidUpdateDidOwnerEvent(
                 f"{did.identifier}#did-root-key",
                 cast(str, did.identifier),
-                test_key.private_key.getPublicKey(),
+                test_key.private_key.public_key(),
                 test_key.key_type,
             ),
         )

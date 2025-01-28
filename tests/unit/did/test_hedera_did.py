@@ -9,7 +9,7 @@ from .common import PRIVATE_KEY
 class TestHederaDid:
     def test_builds_with_private_key_only(self, mock_client_provider):
         """Successfully builds HederaDid with private key only"""
-        did = HederaDid(mock_client_provider, private_key_der=PRIVATE_KEY.toStringDER())
+        did = HederaDid(mock_client_provider, private_key_der=PRIVATE_KEY.to_string())
 
         assert did.identifier is None
         assert did._client == mock_client_provider.get_client()

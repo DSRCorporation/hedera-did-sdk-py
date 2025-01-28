@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from hedera import AccountId, Client, PrivateKey
+from hedera_sdk_python.account.account_id import AccountId
+from hedera_sdk_python.client.client import Client
+from hedera_sdk_python.client.network import Network
+from hedera_sdk_python.crypto.private_key import PrivateKey
 
 from .utils.serializable import Serializable
 
@@ -37,7 +40,7 @@ class NetworkConfig(Serializable):
         raise Exception("Not implemented")
 
     def get_json_payload(self):
-        return {"networkName": self.name, "network": self.nodes, "mirrorNetwork": self.mirror_network}
+        return {"network": self.nodes, "mirrorNetwork": self.mirror_network}
 
 
 class HederaClientProvider:
@@ -61,19 +64,14 @@ class HederaClientProvider:
         if network_name == "custom":
             if not network_config:
                 raise Exception("Network config is required for custom network configuration")
-            self._client = Client.fromConfig(network_config.to_json())
+            # Native Python SDK supports only single node in custom network
+            node_account_id, node_address = network_config.nodes.popitem()
+
+            self._client = Client(Network(node_account_id=node_account_id, node_address=node_address))
         elif network_config:
             raise Exception("Network config is supported only for custom network configuration")
         else:
-            match network_name:
-                case "mainnet":
-                    self._client = Client.forMainnet()
-                case "testnet":
-                    self._client = Client.forTestnet()
-                case "previewnet":
-                    self._client = Client.forPreviewnet()
-                case _:
-                    raise Exception(f"Network is not supported: '{network_name}'")
+            self._client = Client(Network(network=network_name))
 
         if operator_config:
             self.set_operator_config(operator_config)
@@ -87,8 +85,8 @@ class HederaClientProvider:
         Args:
             operator_config: Operator config to set
         """
-        self._client.setOperator(
-            AccountId.fromString(operator_config.account_id), PrivateKey.fromString(operator_config.private_key_der)
+        self._client.set_operator(
+            AccountId.from_string(operator_config.account_id), PrivateKey.from_string(operator_config.private_key_der)
         )
 
     def get_client(self):
@@ -105,5 +103,6 @@ class HederaClientProvider:
 
     def dispose(self):
         """Dispose (close) Hedera client instance."""
-        self._client.close()
+        # Not implemented in Native SDK for some reason
+        # self._client.close()
         self._disposed = True

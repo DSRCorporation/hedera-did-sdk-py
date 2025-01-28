@@ -3,11 +3,12 @@ import time
 from enum import StrEnum
 from typing import cast
 
+from hedera_sdk_python.timestamp import Timestamp
+
 from ..did.utils import parse_identifier
 from ..hcs.hcs_message_resolver import HcsMessageResolver
 from ..hedera_client_provider import HederaClientProvider
 from ..utils.cache import Cache, MemoryCache, TimestampedRecord
-from ..utils.timestamp import Timestamp
 from .did_document import DidDocument
 from .did_error import DidErrorCode, DidException
 from .hcs.hcs_did_message import HcsDidMessage, HcsDidMessageEnvelope
@@ -99,7 +100,7 @@ class HederaDidResolver:
                     result = await HcsMessageResolver(
                         topic_id,
                         HcsDidMessageEnvelope,
-                        timestamp_from=Timestamp(last_updated_timestamp, 0),
+                        timestamp_from=Timestamp(int(last_updated_timestamp), 0),
                     ).execute(self._client_provider.get_client())
 
                     messages = [

@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from hedera import PrivateKey
+from hedera_sdk_python.crypto.private_key import PrivateKey
 
 from did_sdk_py import HederaClientProvider, OperatorConfig
 from did_sdk_py.utils.keys import get_key_type
@@ -15,7 +15,7 @@ if not OPERATOR_ID or not OPERATOR_KEY_DER:
         "You can obtain them by creating developer account on https://portal.hedera.com/"
     )
 
-OPERATOR_KEY = PrivateKey.fromString(OPERATOR_KEY_DER)
+OPERATOR_KEY = PrivateKey.from_string(OPERATOR_KEY_DER)
 
 OPERATOR_KEY_TYPE = get_key_type(OPERATOR_KEY)
 
@@ -23,7 +23,8 @@ OPERATOR_KEY_TYPE = get_key_type(OPERATOR_KEY)
 @pytest.fixture(scope="class")
 def client_provider():
     client_provider = HederaClientProvider(
-        network_name="testnet", operator_config=OperatorConfig(account_id=OPERATOR_ID, private_key_der=OPERATOR_KEY_DER)
+        network_name="testnet",
+        operator_config=OperatorConfig(account_id=OPERATOR_ID, private_key_der=OPERATOR_KEY_DER),
     )
     yield client_provider
     client_provider.dispose()

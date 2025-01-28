@@ -2,6 +2,7 @@ import time
 from unittest.mock import NonCallableMagicMock, call
 
 import pytest
+from hedera_sdk_python.timestamp import Timestamp
 from pytest_mock import MockerFixture
 
 from did_sdk_py import (
@@ -39,7 +40,6 @@ from did_sdk_py.hcs import (
     HcsMessageWithResponseMetadata,
     HcsTopicService,
 )
-from did_sdk_py.utils.timestamp import Timestamp
 from tests.integration.conftest import OPERATOR_KEY_DER
 
 ISSUER_ID = "did:hedera:testnet:zvAQyPeUecGck2EsxcsihxhAB6jZurFrBbj2gC7CNkS5o_0.0.5063027"

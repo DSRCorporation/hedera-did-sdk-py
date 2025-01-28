@@ -16,7 +16,7 @@ from .common import DID_TOPIC_ID_1, IDENTIFIER
 @pytest.fixture
 def transaction(mock_client_provider, test_key):
     did = HederaDid(
-        identifier=IDENTIFIER, private_key_der=test_key.private_key.toStringDER(), client_provider=mock_client_provider
+        identifier=IDENTIFIER, private_key_der=test_key.private_key.to_string(), client_provider=mock_client_provider
     )
 
     message = HcsDidMessage(

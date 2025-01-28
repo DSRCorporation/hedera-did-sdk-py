@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
-from hedera import PublicKey
+from hedera_sdk_python.crypto.public_key import PublicKey
 
 from .....utils.encoding import b58_to_bytes, bytes_to_b58
 from ....types import SupportedKeyType, VerificationRelationshipType
@@ -28,7 +28,7 @@ class HcsDidUpdateVerificationRelationshipEvent(HcsDidEvent):
             "id": self.id_,
             "type": self.type_,
             "controller": self.controller,
-            "publicKeyBase58": bytes_to_b58(bytes(self.public_key.toBytesRaw())),
+            "publicKeyBase58": bytes_to_b58(self.public_key.to_bytes_raw()),
         }
 
     @classmethod
@@ -42,7 +42,7 @@ class HcsDidUpdateVerificationRelationshipEvent(HcsDidEvent):
                 "publicKeyBase58": public_key_base58,
                 "relationshipType": relationship_type,
             }:
-                public_key = PublicKey.fromBytes(b58_to_bytes(public_key_base58))
+                public_key = PublicKey.from_bytes(b58_to_bytes(public_key_base58))
                 return cls(
                     id_=id_,
                     type_=type_,

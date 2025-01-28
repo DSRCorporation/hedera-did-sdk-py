@@ -3,7 +3,10 @@ from collections.abc import Sequence
 from itertools import chain
 from typing import cast
 
-from hedera import PrivateKey, TopicMessageSubmitTransaction, Transaction
+from hedera_sdk_python.consensus.topic_message_submit_transaction import TopicMessageSubmitTransaction
+from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python.timestamp import Timestamp
+from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import (
     HcsFileService,
@@ -13,10 +16,8 @@ from ..hcs import (
     HcsTopicOptions,
     HcsTopicService,
 )
-from ..hcs.constants import MAX_TRANSACTION_FEE
 from ..hedera_client_provider import HederaClientProvider
 from ..utils.cache import Cache, MemoryCache
-from ..utils.timestamp import Timestamp
 from .models import (
     AnonCredsCredDef,
     AnonCredsRevList,
@@ -331,9 +332,9 @@ class HederaAnonCredsRegistry:
             object: Revocation registry definition registration result
         """
         try:
-            issuer_key = PrivateKey.fromString(issuer_key_der)
+            issuer_key = PrivateKey.from_string(issuer_key_der)
 
-            entries_topic_options = HcsTopicOptions(submit_key=issuer_key.getPublicKey())
+            entries_topic_options = HcsTopicOptions(submit_key=issuer_key.public_key())
             entries_topic_id = await self._hcs_topic_service.create_topic(entries_topic_options, [issuer_key])
 
             rev_reg_def_with_metadata = RevRegDefWithHcsMetadata(
@@ -613,11 +614,9 @@ class HederaAnonCredsRegistry:
         def build_message_submit_transaction(
             message_submit_transaction: TopicMessageSubmitTransaction,
         ) -> Transaction:
-            return (
-                message_submit_transaction.setMaxTransactionFee(MAX_TRANSACTION_FEE)
-                .freezeWith(self._client)
-                .sign(PrivateKey.fromString(issuer_key_der))
-            )
+            # FIXME: Find a way to properly set transaction fee
+            # message_submit_transaction.transaction_fee = 2
+            return message_submit_transaction.freeze_with(self._client).sign(PrivateKey.from_string(issuer_key_der))
 
         await HcsMessageTransaction(entries_topic_id, entry_message, build_message_submit_transaction).execute(
             self._client

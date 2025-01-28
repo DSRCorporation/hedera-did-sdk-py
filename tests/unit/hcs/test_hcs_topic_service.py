@@ -17,10 +17,10 @@ def mock_topic_create_transaction(mocker: MockerFixture):
     MockTopicCreateTransaction = mocker.patch("did_sdk_py.hcs.hcs_topic_service.TopicCreateTransaction")
 
     mock_transaction_response = mocker.MagicMock()
-    mock_transaction_response.getReceipt.return_value.topicId.toString.return_value = MOCK_TOPIC_ID
+    mock_transaction_response.topicId.__str__.return_value = MOCK_TOPIC_ID
 
     mock_topic_create_transaction = MockTopicCreateTransaction.return_value
-    mock_topic_create_transaction.freezeWith.return_value = mock_topic_create_transaction
+    mock_topic_create_transaction.freeze_with.return_value = mock_topic_create_transaction
     mock_topic_create_transaction.sign.return_value = mock_topic_create_transaction
     mock_topic_create_transaction.execute.return_value = mock_transaction_response
 
@@ -32,11 +32,10 @@ def mock_topic_update_transaction(mocker: MockerFixture):
     MockTopicUpdateTransaction = mocker.patch("did_sdk_py.hcs.hcs_topic_service.TopicUpdateTransaction")
 
     mock_transaction_response = mocker.MagicMock()
-    mock_transaction_response.getReceipt.return_value.topicId.toString.return_value = MOCK_TOPIC_ID
+    mock_transaction_response.topicId.__str__.return_value = MOCK_TOPIC_ID
 
     mock_topic_update_transaction = MockTopicUpdateTransaction.return_value
-    mock_topic_update_transaction.setTopicId.return_value = mock_topic_update_transaction
-    mock_topic_update_transaction.freezeWith.return_value = mock_topic_update_transaction
+    mock_topic_update_transaction.freeze_with.return_value = mock_topic_update_transaction
     mock_topic_update_transaction.sign.return_value = mock_topic_update_transaction
     mock_topic_update_transaction.execute.return_value = mock_transaction_response
 
@@ -49,8 +48,7 @@ def mock_topic_info_query(mocker: MockerFixture):
     MockTopicInfoQuery = mocker.patch("did_sdk_py.hcs.hcs_topic_service.TopicInfoQuery")
 
     mock_topic_info_query = MockTopicInfoQuery.return_value
-    mock_topic_info_query.setTopicId.return_value = mock_topic_info_query
-    mock_topic_info_query.execute.return_value.topicMemo = MOCK_TOPIC_MEMO
+    mock_topic_info_query.execute.return_value.memo = MOCK_TOPIC_MEMO
 
     return mock_topic_info_query
 
@@ -68,8 +66,8 @@ class TestHcsTopicService:
         )
         assert topic_id == MOCK_TOPIC_ID
 
-        mock_topic_create_transaction.setTopicMemo.assert_called_once()
-        mock_topic_create_transaction.setTopicMemo.assert_called_with(MOCK_TOPIC_MEMO)
+        mock_topic_create_transaction.set_memo.assert_called_once()
+        mock_topic_create_transaction.set_memo.assert_called_with(MOCK_TOPIC_MEMO)
 
         mock_topic_create_transaction.sign.assert_called_once()
         mock_topic_create_transaction.sign.assert_called_with(PRIVATE_KEY)
@@ -88,8 +86,8 @@ class TestHcsTopicService:
             signing_keys=[PRIVATE_KEY],
         )
 
-        mock_topic_update_transaction.setTopicMemo.assert_called_once()
-        mock_topic_update_transaction.setTopicMemo.assert_called_with(MOCK_TOPIC_MEMO)
+        mock_topic_update_transaction.set_memo.assert_called_once()
+        mock_topic_update_transaction.set_memo.assert_called_with(MOCK_TOPIC_MEMO)
 
         mock_topic_update_transaction.sign.assert_called_once()
         mock_topic_update_transaction.sign.assert_called_with(PRIVATE_KEY)
@@ -103,9 +101,7 @@ class TestHcsTopicService:
         service = HcsTopicService(mock_client_provider)
 
         topic_info = await service.get_topic_info(MOCK_TOPIC_ID)
-        assert topic_info.topicMemo == MOCK_TOPIC_MEMO
-
-        mock_topic_info_query.setTopicId.assert_called_once()
+        assert topic_info.memo == MOCK_TOPIC_MEMO
 
         mock_topic_info_query.execute.assert_called_once()
         mock_topic_info_query.execute.assert_called_with(mock_client_provider.get_client())
