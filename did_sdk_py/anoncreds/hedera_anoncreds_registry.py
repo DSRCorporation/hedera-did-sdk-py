@@ -472,7 +472,7 @@ class HederaAnonCredsRegistry:
                 # If returned entries list is empty, we need to fetch the first message and check if list is registered
                 # It's possible that requested timestamp is before the actual registration of rev list -> we want to return initial state for the list (by adding first message to entries)
 
-                # The second request looks redundant here, but it should be the rare case that will e subsequently handled by cache
+                # The second request looks redundant here, but it should be the rare case that will be subsequently handled by cache
                 entries_messages = await HcsMessageResolver(
                     topic_id=entries_topic_id,
                     message_type=HcsRevRegEntryMessage,
@@ -508,7 +508,7 @@ class HederaAnonCredsRegistry:
                 revocation_registry_id=rev_reg_id,
                 resolution_metadata={
                     "error": "otherError",
-                    "message": f"unable to resolve revocation list: ${error!s}",
+                    "message": f"Unable to resolve revocation list: ${error!s}",
                 },
                 revocation_list_metadata={},
             )

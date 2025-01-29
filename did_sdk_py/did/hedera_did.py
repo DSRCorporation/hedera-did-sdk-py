@@ -109,8 +109,7 @@ class HederaDid:
             controller: Identifier of new DID Owner
             new_private_key_der: New DID Owner private key encoded in DER format
         """
-        if not self.topic_id or not self.identifier or not self._private_key:
-            raise Exception("Cannot submit transaction: topic_id, identifier and private_key must be set")
+        self._assert_can_submit_transaction()
 
         document = await self.resolve()
         if not document.controller:
@@ -123,7 +122,7 @@ class HederaDid:
             admin_key=new_private_key.public_key(), submit_key=new_private_key.public_key()
         )
         await self._hcs_topic_service.update_topic(
-            cast(str, self.topic_id), topic_update_options, [self._private_key, new_private_key]
+            cast(str, self.topic_id), topic_update_options, [cast(PrivateKey, self._private_key), new_private_key]
         )
 
         self._private_key = new_private_key

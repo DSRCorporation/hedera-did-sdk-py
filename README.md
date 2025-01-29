@@ -21,8 +21,6 @@ Documentation:
 - Python 3.12+
 - [Poetry](https://python-poetry.org/) (at least 1.8.4)
 - NodeJS and npm (used by pre-commit hooks)
-- JDK 21 (required for Hedera Python SDK which is a wrapper around Java SDK)
-  - The Temurin builds of [Eclipse Adoptium](https://adoptium.net/) are strongly recommended
 - Tools for Makefile support (Windows only)
   - Can be installed with [chocolatey](https://chocolatey.org/): `choco install make`
 

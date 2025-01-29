@@ -7,7 +7,6 @@ from threading import Timer
 from hedera_sdk_python.client.client import Client
 from hedera_sdk_python.timestamp import Timestamp
 
-from ..utils.pyjnius import Runnable
 from .hcs_message import HcsMessage, HcsMessageWithResponseMetadata
 from .hcs_message_envelope import HcsMessageEnvelope
 from .hcs_topic_listener import HcsTopicListener
@@ -48,11 +47,6 @@ class HcsMessageResolver:
 
         self._waiting_timer: Timer | None = None
 
-        # IMPORTANT
-        # We need to store 'PythonJavaClass' reference as long as it can be used by Java to prevent it being cleaned up by Python GC
-        # Otherwise, intermittent segmentation faults and other hard-to-debug issues are possible
-        self._java_query_completion_handler: Runnable | None = None
-
     async def execute(self, client: Client) -> list[HcsMessage | HcsMessageWithResponseMetadata]:
         self._received_message_hashes = []
 
@@ -60,8 +54,6 @@ class HcsMessageResolver:
 
         def handle_completion():
             self._complete(completion_future)
-
-        self._java_query_completion_handler = Runnable(handle_completion)
 
         def handle_error(error: Exception):
             if not completion_future.done() and str(error) != TOPIC_UNSUBSCRIBED_ERROR:
@@ -75,7 +67,7 @@ class HcsMessageResolver:
 
         (
             self._topic_listener.set_end_time(self._timestamp_to or Timestamp(seconds=int(time.time()), nanos=0))
-            .set_completion_handler(self._java_query_completion_handler)
+            .set_completion_handler(handle_completion)
             .subscribe(client, self._handle_message, handle_error)
         )
 

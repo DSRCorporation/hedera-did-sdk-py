@@ -80,7 +80,7 @@ class TestHederaDidResolver:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],

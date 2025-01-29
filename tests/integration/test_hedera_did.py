@@ -19,8 +19,8 @@ TOPIC_REGEX = re.compile(r"^0\.0\.[0-9]{3,}")
 VALID_DID = "did:hedera:testnet:z6MkgUv5CvjRP6AsvEYqSRN7djB6p4zK9bcMQ93g5yK6Td7N_0.0.29613327"
 
 VERIFICATION_PUBLIC_KEY_BASE58 = "87meAWt7t2zrDxo7qw3PVTjexKWReYWS75LH29THy8kb"
-VERIFICATION_PUBLIC_KEY = b58_to_bytes(VERIFICATION_PUBLIC_KEY_BASE58)
-VERIFICATION_PUBLIC_KEY_DER = VERIFICATION_PUBLIC_KEY.toStringDER()
+VERIFICATION_PUBLIC_KEY = PublicKey.from_bytes(b58_to_bytes(VERIFICATION_PUBLIC_KEY_BASE58))
+VERIFICATION_PUBLIC_KEY_DER = VERIFICATION_PUBLIC_KEY.to_string_raw()
 VERIFICATION_PUBLIC_KEY_TYPE = "Ed25519VerificationKey2018"
 VERIFICATION_ID = f"did:hedera:testnet:z{VERIFICATION_PUBLIC_KEY_BASE58}_0.0.29617801#key-1"
 
@@ -61,7 +61,7 @@ class TestHederaDid:
             did = await create_and_register_new_did(client_provider)
             assert did.topic_id
 
-            expected_identifier = f"did:hedera:testnet:{multibase_encode(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw()), 'base58btc')}_{did.topic_id}"
+            expected_identifier = f"did:hedera:testnet:{multibase_encode(bytes(OPERATOR_KEY.public_key().to_bytes_raw()), 'base58btc')}_{did.topic_id}"
 
             assert bool(TOPIC_REGEX.match(did.topic_id))
             assert did.identifier == expected_identifier
@@ -132,7 +132,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],
@@ -173,7 +173,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],
@@ -207,14 +207,14 @@ class TestHederaDid:
 
             with pytest.raises(DidException, match="DID is not registered"):
                 await did.change_owner(
-                    controller=self.NEW_OWNER_ID, new_private_key_der=PrivateKey.generate_ecdsa().to_string()
+                    controller=self.NEW_OWNER_ID, new_private_key_der=PrivateKey.generate_ed25519().to_string()
                 )
 
         async def test_throws_on_missing_private_key(self, client_provider: HederaClientProvider):
             """Throws error if private key is not provided"""
             did = HederaDid(client_provider=client_provider, identifier=VALID_DID)
 
-            new_private_key = PrivateKey.generate_ecdsa()
+            new_private_key = PrivateKey.generate_ed25519()
             with pytest.raises(DidException, match="Private key is required to submit DID event transaction"):
                 await did.change_owner(controller=self.NEW_OWNER_ID, new_private_key_der=new_private_key.to_string())
 
@@ -226,7 +226,7 @@ class TestHederaDid:
             # Wait until changes are propagated to Hedera Mirror node
             await asyncio.sleep(5)
 
-            new_private_key = PrivateKey.generate_ecdsa()
+            new_private_key = PrivateKey.generate_ed25519()
             new_private_key_type = get_key_type(new_private_key)
             await did.change_owner(controller=self.NEW_OWNER_ID, new_private_key_der=new_private_key.to_string())
 
@@ -341,7 +341,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],
@@ -388,7 +388,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],
@@ -431,7 +431,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],
@@ -474,7 +474,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],
@@ -545,7 +545,7 @@ class TestHederaDid:
                 await did.add_verification_method(
                     id_=f"{did.identifier}#invalid-1",
                     controller=VALID_DID,
-                    public_key_der=OPERATOR_KEY.getPublicKey().toStringDER(),
+                    public_key_der=OPERATOR_KEY.public_key().to_string(),
                     type_=OPERATOR_KEY_TYPE,
                 )
 
@@ -588,7 +588,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                     {
@@ -610,7 +610,7 @@ class TestHederaDid:
             assert did.identifier
 
             updated_public_key_base58 = "AvU2AEh8ybRqNwHAM3CjbkjYaYHpt9oA1uugW9EVTg6P"
-            updated_public_key = PublicKey.fromBytes(b58_to_bytes(updated_public_key_base58))
+            updated_public_key = PublicKey.from_bytes(b58_to_bytes(updated_public_key_base58))
             updated_public_key_type = get_key_type(updated_public_key)
 
             await did.add_verification_method(
@@ -641,7 +641,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                     {
@@ -685,7 +685,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],
@@ -754,7 +754,7 @@ class TestHederaDid:
                     id_=f"{did.identifier}#invalid-1",
                     relationship_type="assertionMethod",
                     controller=VALID_DID,
-                    public_key_der=OPERATOR_KEY.getPublicKey().toStringDER(),
+                    public_key_der=OPERATOR_KEY.public_key().to_string(),
                     type_=OPERATOR_KEY_TYPE,
                 )
 
@@ -801,7 +801,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                     {
@@ -823,7 +823,7 @@ class TestHederaDid:
             assert did.identifier
 
             updated_public_key_base58 = "AvU2AEh8ybRqNwHAM3CjbkjYaYHpt9oA1uugW9EVTg6P"
-            updated_public_key = PublicKey.fromBytes(b58_to_bytes(updated_public_key_base58))
+            updated_public_key = PublicKey.from_bytes(b58_to_bytes(updated_public_key_base58))
             updated_public_key_type = get_key_type(updated_public_key)
 
             await did.add_verification_relationship(
@@ -837,7 +837,7 @@ class TestHederaDid:
                 id_=VERIFICATION_ID,
                 relationship_type="assertionMethod",
                 controller=did.identifier,
-                public_key_der=updated_public_key.toStringDER(),
+                public_key_der=updated_public_key.to_string(),
                 type_=updated_public_key_type,
             )
 
@@ -856,7 +856,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                     {
@@ -901,7 +901,7 @@ class TestHederaDid:
                     {
                         "controller": did.identifier,
                         "id": f"{did.identifier}#did-root-key",
-                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.getPublicKey().toBytesRaw())),
+                        "publicKeyBase58": bytes_to_b58(bytes(OPERATOR_KEY.public_key().to_bytes_raw())),
                         "type": OPERATOR_KEY_TYPE,
                     },
                 ],

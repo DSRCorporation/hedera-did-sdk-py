@@ -7,7 +7,6 @@ from hedera_sdk_python.consensus.topic_message import TopicMessage
 from hedera_sdk_python.query.topic_message_query import TopicMessageQuery
 from hedera_sdk_python.timestamp import Timestamp
 
-from ..utils.pyjnius import Runnable
 from .hcs_message import HcsMessage, HcsMessageWithResponseMetadata
 
 LOGGER = logging.getLogger(__name__)
@@ -47,7 +46,7 @@ class HcsTopicListener:
         self._query.set_limit(limit)
         return self
 
-    def set_completion_handler(self, completion_handler: Runnable):
+    def set_completion_handler(self, completion_handler: Callable[[], None]):
         # Not implemented in native SDK
         # self._query.setCompletionHandler(completion_handler)
         return self
@@ -99,7 +98,7 @@ class HcsTopicListener:
                 HcsMessageWithResponseMetadata(
                     message=message,
                     sequence_number=response.sequence_number,
-                    consensus_timestamp=Timestamp.from_date(response.consensus_timestamp),
+                    consensus_timestamp=Timestamp.from_protobuf(response.consensus_timestamp),
                 )
             )
         else:

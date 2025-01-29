@@ -35,7 +35,7 @@ class TestHcsFileService:
         )
         topic_messages = await HcsMessageResolver(topic_id, HcsFileChunkMessage).execute(client_provider.get_client())
 
-        assert topic_info.topicMemo == f"{sha256(file_payload).hexdigest()}:zstd:base64"
+        assert topic_info.memo == f"{sha256(file_payload).hexdigest()}:zstd:base64"
         assert len(topic_messages) == expected_chunks_count
 
     @pytest.mark.parametrize(
@@ -54,7 +54,7 @@ class TestHcsFileService:
         topic_info = await execute_hcs_query_async(
             TopicInfoQuery(topic_id=TopicId.from_string(topic_id)), client_provider.get_client()
         )
-        topic_file_hash, _, _ = topic_info.topicMemo.split(":")
+        topic_file_hash, _, _ = topic_info.memo.split(":")
 
         assert topic_file_hash == sha256(resolved_payload).hexdigest()
         assert topic_file_hash == expected_hash
