@@ -3,11 +3,10 @@ import time
 from enum import StrEnum
 from typing import cast
 
-from hedera_sdk_python import Timestamp
+from hedera_sdk_python import Client, Timestamp
 
 from ..did.utils import parse_identifier
 from ..hcs.hcs_message_resolver import HcsMessageResolver
-from ..hedera_client_provider import HederaClientProvider
 from ..utils.cache import Cache, MemoryCache, TimestampedRecord
 from .did_document import DidDocument
 from .did_error import DidErrorCode, DidException
@@ -63,16 +62,16 @@ class HederaDidResolver:
     """Hedera DID Resolver implementation.
 
     Args:
-        client_provider: Hedera Client provider
+        client: Hedera Client
         cache_instance: Custom cache instance. If not provided, in-memory cache is used
     """
 
     def __init__(
         self,
-        client_provider: HederaClientProvider,
+        client: Client,
         cache_instance: Cache[str, TimestampedRecord[DidDocument]] | None = None,
     ):
-        self._client_provider = client_provider
+        self._client = client
         self._cache = cache_instance or MemoryCache[str, TimestampedRecord[DidDocument]]()
 
     async def resolve(self, did: str) -> DIDResolutionResult:
@@ -101,7 +100,7 @@ class HederaDidResolver:
                         topic_id,
                         HcsDidMessageEnvelope,
                         timestamp_from=Timestamp(int(last_updated_timestamp), 0),
-                    ).execute(self._client_provider.get_client())
+                    ).execute(self._client)
 
                     messages = [
                         cast(HcsDidMessage, envelope.message) for envelope in cast(list[HcsDidMessageEnvelope], result)
@@ -114,7 +113,7 @@ class HederaDidResolver:
                         TimestampedRecord(did_document, did_document.updated or did_document.created or time.time()),
                     )
             else:
-                registered_did = HederaDid(identifier=did, client_provider=self._client_provider)
+                registered_did = HederaDid(identifier=did, client=self._client)
 
                 did_document = await registered_did.resolve()
 

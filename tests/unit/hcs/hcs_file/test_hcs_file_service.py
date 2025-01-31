@@ -3,9 +3,9 @@ from pathlib import Path
 from unittest.mock import NonCallableMagicMock
 
 import pytest
+from hedera_sdk_python import Client
 from pytest_mock import MockerFixture
 
-from did_sdk_py import HederaClientProvider
 from did_sdk_py.hcs import (
     HcsFileChunkMessage,
     HcsFileService,
@@ -76,13 +76,13 @@ class TestHcsFileService:
         self,
         test_file_path: str,
         expected_chunks_count: int,
-        mock_client_provider: HederaClientProvider,
+        mock_client: Client,
         mock_hcs_topic_service: NonCallableMagicMock,
         mock_hcs_message_transaction: NonCallableMagicMock,
         Something,
     ):
         file_payload = Path(test_file_path).read_bytes()
-        service = HcsFileService(mock_client_provider)
+        service = HcsFileService(mock_client)
 
         topic_id = await service.submit_file(file_payload, OPERATOR_KEY_DER)
         assert topic_id == MOCK_TOPIC_ID
@@ -96,11 +96,11 @@ class TestHcsFileService:
 
     async def test_resolves_messages_from_topic(
         self,
-        mock_client_provider: HederaClientProvider,
+        mock_client: Client,
         mock_hcs_topic_service: NonCallableMagicMock,
         mock_hcs_message_resolver: NonCallableMagicMock,
     ):
-        service = HcsFileService(mock_client_provider)
+        service = HcsFileService(mock_client)
 
         payload = await service.resolve_file(MOCK_TOPIC_ID)
 
@@ -114,13 +114,13 @@ class TestHcsFileService:
 
     async def test_throws_on_resolving_file_with_wrong_hash(
         self,
-        mock_client_provider: HederaClientProvider,
+        mock_client: Client,
         mock_hcs_topic_service: NonCallableMagicMock,
         mock_hcs_message_resolver: NonCallableMagicMock,
     ):
         mock_hcs_message_resolver.execute.return_value = get_file_chunk_messages(b"invalid_payload")
 
-        service = HcsFileService(mock_client_provider)
+        service = HcsFileService(mock_client)
         with pytest.raises(Exception, match="Resolved HCS file payload is invalid"):
             await service.resolve_file(MOCK_TOPIC_ID)
 
@@ -130,9 +130,9 @@ class TestHcsFileService:
         mock_hcs_message_resolver.execute.assert_awaited_once()
 
     async def test_throws_on_resolving_invalid_topic_id(
-        self, mock_client_provider: HederaClientProvider, mock_hcs_topic_service: NonCallableMagicMock
+        self, mock_client: Client, mock_hcs_topic_service: NonCallableMagicMock
     ):
-        service = HcsFileService(mock_client_provider)
+        service = HcsFileService(mock_client)
         with pytest.raises(
             Exception,
             match="Invalid TopicId format. Expected 'shard.realm.num'",
@@ -143,11 +143,11 @@ class TestHcsFileService:
         mock_hcs_topic_service.get_topic_info.assert_awaited_with("invalid_topic_id")
 
     async def test_throws_on_resolving_invalid_topic_memo(
-        self, mock_client_provider: HederaClientProvider, mock_hcs_topic_service, mock_hcs_message_resolver
+        self, mock_client: Client, mock_hcs_topic_service, mock_hcs_message_resolver
     ):
         mock_hcs_topic_service.get_topic_info.return_value.memo = "invalid_topic_memo"
 
-        service = HcsFileService(mock_client_provider)
+        service = HcsFileService(mock_client)
         with pytest.raises(
             Exception,
             match=f"HCS file Topic '{MOCK_TOPIC_ID}' is invalid - must contain memo compliant with HCS-1 standard",

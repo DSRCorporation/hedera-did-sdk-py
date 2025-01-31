@@ -2,7 +2,7 @@ import time
 from unittest.mock import NonCallableMagicMock, call
 
 import pytest
-from hedera_sdk_python.timestamp import Timestamp
+from hedera_sdk_python import Client, Timestamp
 from pytest_mock import MockerFixture
 
 from did_sdk_py import (
@@ -13,7 +13,6 @@ from did_sdk_py import (
     CredDefValue,
     CredDefValuePrimary,
     HederaAnonCredsRegistry,
-    HederaClientProvider,
     MemoryCache,
     RevRegDefValue,
 )
@@ -176,12 +175,10 @@ def mock_hcs_message_resolver(mocker: MockerFixture):
 @pytest.mark.asyncio(loop_scope="session")
 class TestHederaAnonCredsRegistry:
     class TestSchema:
-        async def test_resolves_schema_hcs_file(
-            self, mock_client_provider: HederaClientProvider, mock_hcs_file_service: NonCallableMagicMock
-        ):
+        async def test_resolves_schema_hcs_file(self, mock_client: Client, mock_hcs_file_service: NonCallableMagicMock):
             mock_hcs_file_service.resolve_file.return_value = MOCK_SCHEMA.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             schema_resolution_result = await registry.get_schema(MOCK_SCHEMA_ID)
 
             assert schema_resolution_result == GetSchemaResult(
@@ -196,12 +193,12 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.resolve_file.return_value = None
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             schema_resolution_result = await registry.get_schema(MOCK_SCHEMA_ID)
 
             assert schema_resolution_result == GetSchemaResult(
@@ -218,10 +215,10 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found_on_invalid_id(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             schema_resolution_result = await registry.get_schema(MOCK_CRED_DEF_ID)
 
             assert schema_resolution_result == GetSchemaResult(
@@ -237,12 +234,12 @@ class TestHederaAnonCredsRegistry:
 
         async def test_registers_schema_as_hcs_file(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.submit_file.return_value = MOCK_SCHEMA_TOPIC_ID
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             schema_register_result = await registry.register_schema(MOCK_SCHEMA, OPERATOR_KEY_DER)
 
             assert schema_register_result == RegisterSchemaResult(
@@ -258,11 +255,11 @@ class TestHederaAnonCredsRegistry:
             mock_hcs_file_service.submit_file.assert_awaited_once()
             mock_hcs_file_service.submit_file.assert_awaited_with(MOCK_SCHEMA.to_json().encode(), OPERATOR_KEY_DER)
 
-        async def test_resolve_hits_cache(self, mock_client_provider: HederaClientProvider, mocker: MockerFixture):
+        async def test_resolve_hits_cache(self, mock_client: Client, mocker: MockerFixture):
             mock_cache_get = mocker.patch("did_sdk_py.utils.cache.Cache.get")
             mock_cache_get.return_value = MOCK_SCHEMA
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
 
             resolution_result = await registry.get_schema(MOCK_SCHEMA_ID)
             assert resolution_result.schema == MOCK_SCHEMA
@@ -272,12 +269,12 @@ class TestHederaAnonCredsRegistry:
     class TestCredDef:
         async def test_resolves_cred_def_hcs_file(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.resolve_file.return_value = MOCK_CRED_DEF.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             cred_def_resolution_result = await registry.get_cred_def(MOCK_CRED_DEF_ID)
 
             assert cred_def_resolution_result == GetCredDefResult(
@@ -292,12 +289,12 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.resolve_file.return_value = None
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             cred_def_resolution_result = await registry.get_cred_def(MOCK_CRED_DEF_ID)
 
             assert cred_def_resolution_result == GetCredDefResult(
@@ -314,10 +311,10 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found_on_invalid_id(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             cred_def_resolution_result = await registry.get_cred_def(MOCK_SCHEMA_ID)
 
             assert cred_def_resolution_result == GetCredDefResult(
@@ -333,12 +330,12 @@ class TestHederaAnonCredsRegistry:
 
         async def test_registers_cred_def_as_hcs_file(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.submit_file.return_value = MOCK_CRED_DEF_TOPIC_ID
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             cred_def_registration_result = await registry.register_cred_def(MOCK_CRED_DEF, OPERATOR_KEY_DER)
 
             assert cred_def_registration_result == RegisterCredDefResult(
@@ -356,11 +353,11 @@ class TestHederaAnonCredsRegistry:
             mock_hcs_file_service.submit_file.assert_awaited_once()
             mock_hcs_file_service.submit_file.assert_awaited_with(MOCK_CRED_DEF.to_json().encode(), OPERATOR_KEY_DER)
 
-        async def test_resolve_hits_cache(self, mock_client_provider: HederaClientProvider, mocker: MockerFixture):
+        async def test_resolve_hits_cache(self, mock_client: Client, mocker: MockerFixture):
             mock_cache_get = mocker.patch("did_sdk_py.utils.cache.Cache.get")
             mock_cache_get.return_value = MOCK_CRED_DEF
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
 
             resolution_result = await registry.get_cred_def(MOCK_CRED_DEF_ID)
             assert resolution_result.credential_definition == MOCK_CRED_DEF
@@ -370,12 +367,12 @@ class TestHederaAnonCredsRegistry:
     class TestRevRegDef:
         async def test_resolves_rev_reg_def_hcs_file(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.resolve_file.return_value = MOCK_REV_REG_DEF_WITH_METADATA.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_reg_def(MOCK_REV_REG_DEF_ID)
 
             assert resolution_result == GetRevRegDefResult(
@@ -390,12 +387,12 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.resolve_file.return_value = None
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_reg_def(MOCK_REV_REG_DEF_ID)
 
             assert resolution_result == GetRevRegDefResult(
@@ -412,10 +409,10 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found_on_invalid_id(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
         ):
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_reg_def(MOCK_SCHEMA_ID)
 
             assert resolution_result == GetRevRegDefResult(
@@ -431,13 +428,13 @@ class TestHederaAnonCredsRegistry:
 
         async def test_registers_reg_reg_def_as_hcs_file(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_topic_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.submit_file.return_value = MOCK_REV_REG_DEF_TOPIC_ID
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             registration_result = await registry.register_rev_reg_def(MOCK_REV_REG_DEF, OPERATOR_KEY_DER)
 
             assert registration_result == RegisterRevRegDefResult(
@@ -459,14 +456,14 @@ class TestHederaAnonCredsRegistry:
 
         async def test_caches_registered_rev_reg_def(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_topic_service: NonCallableMagicMock,
         ):
             mock_hcs_file_service.submit_file.return_value = MOCK_REV_REG_DEF_TOPIC_ID
 
             cache_instance = MemoryCache[str, object]()
-            registry = HederaAnonCredsRegistry(mock_client_provider, cache_instance)
+            registry = HederaAnonCredsRegistry(mock_client, cache_instance)
             registration_result = await registry.register_rev_reg_def(MOCK_REV_REG_DEF, OPERATOR_KEY_DER)
 
             assert registration_result.revocation_registry_definition_state.state == "finished"
@@ -474,11 +471,11 @@ class TestHederaAnonCredsRegistry:
             cached_rev_reg_def = cache_instance.get(MOCK_REV_REG_DEF_TOPIC_ID)
             assert cached_rev_reg_def == MOCK_REV_REG_DEF_WITH_METADATA
 
-        async def test_resolve_hits_cache(self, mock_client_provider: HederaClientProvider, mocker: MockerFixture):
+        async def test_resolve_hits_cache(self, mock_client: Client, mocker: MockerFixture):
             mock_cache_get = mocker.patch("did_sdk_py.utils.cache.Cache.get")
             mock_cache_get.return_value = MOCK_REV_REG_DEF_WITH_METADATA
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
 
             resolution_result = await registry.get_rev_reg_def(MOCK_REV_REG_DEF_ID)
             assert resolution_result.revocation_registry_definition == MOCK_REV_REG_DEF
@@ -488,14 +485,14 @@ class TestHederaAnonCredsRegistry:
     class TestRevList:
         async def test_resolves_rev_list(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_resolver: NonCallableMagicMock,
             mock_rev_list: AnonCredsRevList,
         ):
             mock_hcs_file_service.resolve_file.return_value = MOCK_REV_REG_DEF_WITH_METADATA.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_list(MOCK_REV_REG_DEF_ID, int(time.time()))
 
             assert resolution_result == GetRevListResult(
@@ -512,13 +509,13 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found_if_rev_def_is_missing(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_resolver: NonCallableMagicMock,
         ):
             mock_hcs_file_service.resolve_file.return_value = None
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_list(MOCK_REV_REG_DEF_ID, int(time.time()))
 
             assert resolution_result == GetRevListResult(
@@ -537,14 +534,14 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_not_found_if_entries_topic_id_is_missing(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_resolver: NonCallableMagicMock,
         ):
             mock_reg_def_with_missing_metadata = RevRegDefWithHcsMetadata(rev_reg_def=MOCK_REV_REG_DEF, hcs_metadata={})  # pyright: ignore [reportArgumentType]
             mock_hcs_file_service.resolve_file.return_value = mock_reg_def_with_missing_metadata.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_list(MOCK_REV_REG_DEF_ID, int(time.time()))
 
             assert resolution_result == GetRevListResult(
@@ -563,7 +560,7 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolve_returns_initial_list(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_resolver: NonCallableMagicMock,
             Something,
@@ -574,7 +571,7 @@ class TestHederaAnonCredsRegistry:
                 [MOCK_REV_ENTRY_MESSAGES_WITH_METADATA[0]],
             ]
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_list(MOCK_REV_REG_DEF_ID, int(time.time()))
 
             assert resolution_result == GetRevListResult(
@@ -596,14 +593,14 @@ class TestHederaAnonCredsRegistry:
 
         async def test_returns_not_found_if_entries_are_missing(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_resolver: NonCallableMagicMock,
         ):
             mock_hcs_file_service.resolve_file.return_value = MOCK_REV_REG_DEF_WITH_METADATA.to_json().encode()
             mock_hcs_message_resolver.execute.return_value = []
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             resolution_result = await registry.get_rev_list(MOCK_REV_REG_DEF_ID, int(time.time()))
 
             assert resolution_result == GetRevListResult(
@@ -622,14 +619,14 @@ class TestHederaAnonCredsRegistry:
 
         async def test_registers_rev_list(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_transaction: NonCallableMagicMock,
             mock_rev_list: AnonCredsRevList,
         ):
             mock_hcs_file_service.resolve_file.return_value = MOCK_REV_REG_DEF_WITH_METADATA.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             registration_result = await registry.register_rev_list(mock_rev_list, OPERATOR_KEY_DER)
 
             assert registration_result == RegisterRevListResult(
@@ -643,7 +640,7 @@ class TestHederaAnonCredsRegistry:
 
         async def test_updates_rev_list(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_transaction: NonCallableMagicMock,
             mock_rev_list: AnonCredsRevList,
@@ -651,7 +648,7 @@ class TestHederaAnonCredsRegistry:
         ):
             mock_hcs_file_service.resolve_file.return_value = MOCK_REV_REG_DEF_WITH_METADATA.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             registration_result = await registry.update_rev_list(
                 mock_rev_list_previous,
                 mock_rev_list,
@@ -672,7 +669,7 @@ class TestHederaAnonCredsRegistry:
 
         async def test_register_or_update_fail_if_rev_def_is_missing(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_transaction: NonCallableMagicMock,
             mock_rev_list: AnonCredsRevList,
@@ -680,7 +677,7 @@ class TestHederaAnonCredsRegistry:
         ):
             mock_hcs_file_service.resolve_file.return_value = None
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             registration_result = await registry.register_rev_list(mock_rev_list, OPERATOR_KEY_DER)
 
             assert registration_result == RegisterRevListResult(
@@ -717,7 +714,7 @@ class TestHederaAnonCredsRegistry:
 
         async def test_register_or_update_fail_if_entries_topic_id_is_missing(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_transaction: NonCallableMagicMock,
             mock_rev_list: AnonCredsRevList,
@@ -726,7 +723,7 @@ class TestHederaAnonCredsRegistry:
             mock_reg_def_with_missing_metadata = RevRegDefWithHcsMetadata(rev_reg_def=MOCK_REV_REG_DEF, hcs_metadata={})  # pyright: ignore [reportArgumentType]
             mock_hcs_file_service.resolve_file.return_value = mock_reg_def_with_missing_metadata.to_json().encode()
 
-            registry = HederaAnonCredsRegistry(mock_client_provider)
+            registry = HederaAnonCredsRegistry(mock_client)
             registration_result = await registry.register_rev_list(mock_rev_list, OPERATOR_KEY_DER)
 
             assert registration_result == RegisterRevListResult(
@@ -764,7 +761,7 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolves_previous_state_from_cache(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_resolver: NonCallableMagicMock,
             mock_rev_list_previous: AnonCredsRevList,
@@ -775,7 +772,7 @@ class TestHederaAnonCredsRegistry:
                 MOCK_REV_ENTRY_MESSAGES_WITH_METADATA,
             ]
 
-            registry = HederaAnonCredsRegistry(mock_client_provider, mock_cache_instance)
+            registry = HederaAnonCredsRegistry(mock_client, mock_cache_instance)
             resolution_result = await registry.get_rev_list(MOCK_REV_REG_DEF_ID, 200)
 
             assert resolution_result == GetRevListResult(
@@ -796,7 +793,7 @@ class TestHederaAnonCredsRegistry:
 
         async def test_resolves_future_state_using_cache(
             self,
-            mock_client_provider: HederaClientProvider,
+            mock_client: Client,
             mock_hcs_file_service: NonCallableMagicMock,
             mock_hcs_message_resolver: NonCallableMagicMock,
             mock_rev_list: AnonCredsRevList,
@@ -808,7 +805,7 @@ class TestHederaAnonCredsRegistry:
             ]
             mock_hcs_message_resolver.execute.return_value = [MOCK_REV_ENTRY_MESSAGES_WITH_METADATA[-1]]
 
-            registry = HederaAnonCredsRegistry(mock_client_provider, mock_cache_instance)
+            registry = HederaAnonCredsRegistry(mock_client, mock_cache_instance)
             resolution_result = await registry.get_rev_list(MOCK_REV_REG_DEF_ID, 300)
 
             assert resolution_result == GetRevListResult(

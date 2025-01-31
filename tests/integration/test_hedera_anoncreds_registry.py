@@ -2,6 +2,7 @@ import asyncio
 import time
 
 import pytest
+from hedera_sdk_python import Client
 
 from did_sdk_py import (
     AnonCredsCredDef,
@@ -11,7 +12,6 @@ from did_sdk_py import (
     CredDefValue,
     CredDefValuePrimary,
     HederaAnonCredsRegistry,
-    HederaClientProvider,
     RevRegDefValue,
 )
 from did_sdk_py.anoncreds.models.revocation import HcsRevRegEntryMessage, RevRegEntryValue
@@ -72,8 +72,8 @@ ACCUM_2 = "mock-accum-2"
 @pytest.mark.flaky(retries=3, delay=1)
 @pytest.mark.asyncio(loop_scope="session")
 class TestHederaAnonCredsRegistry:
-    async def test_creates_anoncreds_schema(self, client_provider: HederaClientProvider, Something):
-        registry = HederaAnonCredsRegistry(client_provider)
+    async def test_creates_anoncreds_schema(self, client: Client, Something):
+        registry = HederaAnonCredsRegistry(client)
 
         schema = AnonCredsSchema(**MOCK_SCHEMA_PARAMS)
         registration_result = await registry.register_schema(schema, OPERATOR_KEY_DER)
@@ -100,8 +100,8 @@ class TestHederaAnonCredsRegistry:
             schema=schema, schema_id=schema_id, resolution_metadata={}, schema_metadata={}
         )
 
-    async def test_creates_anoncreds_cred_def(self, client_provider: HederaClientProvider, Something):
-        registry = HederaAnonCredsRegistry(client_provider)
+    async def test_creates_anoncreds_cred_def(self, client: Client, Something):
+        registry = HederaAnonCredsRegistry(client)
 
         cred_def = AnonCredsCredDef(**MOCK_CRED_DEF_PARAMS)
         registration_result = await registry.register_cred_def(cred_def, OPERATOR_KEY_DER)
@@ -135,8 +135,8 @@ class TestHederaAnonCredsRegistry:
             credential_definition_metadata={},
         )
 
-    async def test_creates_anoncreds_rev_reg_def(self, client_provider: HederaClientProvider, Something):
-        registry = HederaAnonCredsRegistry(client_provider)
+    async def test_creates_anoncreds_rev_reg_def(self, client: Client, Something):
+        registry = HederaAnonCredsRegistry(client)
 
         rev_reg_def = AnonCredsRevRegDef(**MOCK_REV_REG_DEF_PARAMS)
         registration_result = await registry.register_rev_reg_def(rev_reg_def, OPERATOR_KEY_DER)
@@ -170,8 +170,8 @@ class TestHederaAnonCredsRegistry:
             revocation_registry_definition_metadata={"entries_topic_id": Something},
         )
 
-    async def test_creates_and_updates_rev_list(self, client_provider: HederaClientProvider, Something):
-        registry = HederaAnonCredsRegistry(client_provider)
+    async def test_creates_and_updates_rev_list(self, client: Client, Something):
+        registry = HederaAnonCredsRegistry(client)
 
         rev_reg_def = AnonCredsRevRegDef(**MOCK_REV_REG_DEF_PARAMS)
         rev_reg_def_registration_result = await registry.register_rev_reg_def(rev_reg_def, OPERATOR_KEY_DER)
@@ -207,9 +207,7 @@ class TestHederaAnonCredsRegistry:
         # Wait until changes are propagated to Hedera Mirror node
         await asyncio.sleep(5)
 
-        entries_messages = await HcsMessageResolver(rev_reg_entries_topic_id, HcsRevRegEntryMessage).execute(
-            client_provider.get_client()
-        )
+        entries_messages = await HcsMessageResolver(rev_reg_entries_topic_id, HcsRevRegEntryMessage).execute(client)
 
         assert len(entries_messages) == 1
         assert entries_messages[0] == HcsRevRegEntryMessage(value=RevRegEntryValue(accum=ACCUM_1))
@@ -244,9 +242,7 @@ class TestHederaAnonCredsRegistry:
         # Wait until changes are propagated to Hedera Mirror node
         await asyncio.sleep(5)
 
-        entries_messages = await HcsMessageResolver(rev_reg_entries_topic_id, HcsRevRegEntryMessage).execute(
-            client_provider.get_client()
-        )
+        entries_messages = await HcsMessageResolver(rev_reg_entries_topic_id, HcsRevRegEntryMessage).execute(client)
 
         assert len(entries_messages) == 2
         assert entries_messages[0] == HcsRevRegEntryMessage(value=RevRegEntryValue(accum=ACCUM_1))

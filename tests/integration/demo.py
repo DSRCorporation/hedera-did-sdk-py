@@ -3,7 +3,7 @@ import json
 import time
 
 import pytest
-from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python import Client, PrivateKey
 
 from did_sdk_py import (
     AnonCredsCredDef,
@@ -14,7 +14,6 @@ from did_sdk_py import (
     CredDefValuePrimary,
     CredDefValueRevocation,
     HederaAnonCredsRegistry,
-    HederaClientProvider,
     HederaDid,
     HederaDidResolver,
     RevRegDefValue,
@@ -58,10 +57,10 @@ DEMO_REV_LIST_ACCUM = "21 1200126E528235C2C22071C3F573985E6E07F49217414A0490482B
 
 @pytest.mark.asyncio(loop_scope="session")
 class TestDemo:
-    async def test_demo(self, client_provider: HederaClientProvider):
+    async def test_demo(self, client: Client):
         # Create issuer private key and register Hedera DID
         issuer_private_key = PrivateKey.generate_ed25519()
-        issuer_did = HederaDid(client_provider=client_provider, private_key_der=issuer_private_key.to_string())
+        issuer_did = HederaDid(client=client, private_key_der=issuer_private_key.to_string())
 
         await issuer_did.register()
 
@@ -97,7 +96,7 @@ class TestDemo:
         await asyncio.sleep(5)
 
         # Create Hedera DID resolver instance
-        did_resolver = HederaDidResolver(client_provider)
+        did_resolver = HederaDidResolver(client)
 
         print("Resolving issuer DID document...")
 
@@ -110,7 +109,7 @@ class TestDemo:
         print(json.dumps(did_document, indent=2, default=str))
 
         # Create Hedera AnonCreds registry instance
-        anoncreds_registry = HederaAnonCredsRegistry(client_provider)
+        anoncreds_registry = HederaAnonCredsRegistry(client)
 
         # AnonCreds schema write/read flow
 

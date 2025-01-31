@@ -1,9 +1,9 @@
 from unittest.mock import NonCallableMagicMock
 
 import pytest
+from hedera_sdk_python import Client
 from pytest_mock import MockerFixture
 
-from did_sdk_py import HederaClientProvider
 from did_sdk_py.hcs import HcsTopicOptions, HcsTopicService
 
 from ..conftest import PRIVATE_KEY
@@ -55,13 +55,11 @@ def mock_topic_info_query(mocker: MockerFixture):
 
 @pytest.mark.asyncio(loop_scope="session")
 class TestHcsTopicService:
-    async def test_creates_new_topic(
-        self, mock_client_provider: HederaClientProvider, mock_topic_create_transaction: NonCallableMagicMock
-    ):
-        service = HcsTopicService(mock_client_provider)
+    async def test_creates_new_topic(self, mock_client: Client, mock_topic_create_transaction: NonCallableMagicMock):
+        service = HcsTopicService(mock_client)
 
         topic_id = await service.create_topic(
-            topic_options=HcsTopicOptions(submit_key=PRIVATE_KEY, topic_memo=MOCK_TOPIC_MEMO),
+            topic_options=HcsTopicOptions(submit_key=PRIVATE_KEY.public_key(), topic_memo=MOCK_TOPIC_MEMO),
             signing_keys=[PRIVATE_KEY],
         )
         assert topic_id == MOCK_TOPIC_ID
@@ -73,16 +71,16 @@ class TestHcsTopicService:
         mock_topic_create_transaction.sign.assert_called_with(PRIVATE_KEY)
 
         mock_topic_create_transaction.execute.assert_called_once()
-        mock_topic_create_transaction.execute.assert_called_with(mock_client_provider.get_client())
+        mock_topic_create_transaction.execute.assert_called_with(mock_client)
 
     async def test_updates_existing_topic(
-        self, mock_client_provider: HederaClientProvider, mock_topic_update_transaction: NonCallableMagicMock
+        self, mock_client: Client, mock_topic_update_transaction: NonCallableMagicMock
     ):
-        service = HcsTopicService(mock_client_provider)
+        service = HcsTopicService(mock_client)
 
         await service.update_topic(
             topic_id=MOCK_TOPIC_ID,
-            topic_options=HcsTopicOptions(submit_key=PRIVATE_KEY, topic_memo=MOCK_TOPIC_MEMO),
+            topic_options=HcsTopicOptions(submit_key=PRIVATE_KEY.public_key(), topic_memo=MOCK_TOPIC_MEMO),
             signing_keys=[PRIVATE_KEY],
         )
 
@@ -93,15 +91,13 @@ class TestHcsTopicService:
         mock_topic_update_transaction.sign.assert_called_with(PRIVATE_KEY)
 
         mock_topic_update_transaction.execute.assert_called_once()
-        mock_topic_update_transaction.execute.assert_called_with(mock_client_provider.get_client())
+        mock_topic_update_transaction.execute.assert_called_with(mock_client)
 
-    async def test_returns_topic_info(
-        self, mock_client_provider: HederaClientProvider, mock_topic_info_query: NonCallableMagicMock
-    ):
-        service = HcsTopicService(mock_client_provider)
+    async def test_returns_topic_info(self, mock_client: Client, mock_topic_info_query: NonCallableMagicMock):
+        service = HcsTopicService(mock_client)
 
         topic_info = await service.get_topic_info(MOCK_TOPIC_ID)
         assert topic_info.memo == MOCK_TOPIC_MEMO
 
         mock_topic_info_query.execute.assert_called_once()
-        mock_topic_info_query.execute.assert_called_with(mock_client_provider.get_client())
+        mock_topic_info_query.execute.assert_called_with(mock_client)

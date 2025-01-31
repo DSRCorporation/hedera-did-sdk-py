@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python import PrivateKey
 
 from did_sdk_py.did.did_document import DidDocument
 from did_sdk_py.did.did_document_operation import DidDocumentOperation

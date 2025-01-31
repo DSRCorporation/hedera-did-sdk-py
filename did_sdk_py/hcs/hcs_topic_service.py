@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from hedera_sdk_python import (
+    Client,
     PrivateKey,
     PublicKey,
     TopicCreateTransaction,
@@ -10,7 +11,6 @@ from hedera_sdk_python import (
 )
 from hedera_sdk_python.consensus.topic_info import TopicInfo
 
-from ..hedera_client_provider import HederaClientProvider
 from .utils import execute_hcs_query_async, execute_hcs_transaction_async, sign_hcs_transaction_async
 
 TopicTransaction = TopicCreateTransaction | TopicUpdateTransaction
@@ -43,8 +43,8 @@ def _set_topic_transaction_options(transaction: TopicTransaction, topic_options:
 
 
 class HcsTopicService:
-    def __init__(self, client_provider: HederaClientProvider):
-        self._client = client_provider.get_client()
+    def __init__(self, client: Client):
+        self._client = client
 
     async def create_topic(self, topic_options: HcsTopicOptions, signing_keys: list[PrivateKey]) -> str:
         transaction = _set_topic_transaction_options(TopicCreateTransaction(), topic_options).freeze_with(self._client)

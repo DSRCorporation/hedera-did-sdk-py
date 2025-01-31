@@ -20,33 +20,32 @@ Configuration consists from two parts:
 
 ### Examples
 
-#### Create client provider for Testnet and change operator config
+#### Create client for Testnet and set operator config
 
 ```python
-client_provider = HederaClientProvider(
-    network_name="testnet",
-    operator_config=OperatorConfig(account_id=OPERATOR_ID, private_key_der=OPERATOR_KEY_DER)
+from hedera_sdk_python import Client, Network, AccountId, PrivateKey
+
+client = Client(
+    network=Network("testnet")
 )
 
-client_provider.set_operator_config(OperatorConfig(account_id=NEW_OPERATOR_ID, private_key_der=NEW_OPERATOR_KEY_DER))
+client.set_operator(AccountId.from_string("OPERATOR_ID"), private_key=PrivateKey.from_string("OPERATOR_KEY"))
 ```
 
 #### Create client provider with custom network config
 
 ```python
-TESTNET_NODES = {
-    "0.0.4": "3.212.6.13:50212",
-    "0.0.3": "34.94.106.61:50212",
-    "0.0.8": "34.106.102.218:50212",
-    "0.0.5": "35.245.27.193:50212",
-    "0.0.7": "54.176.199.109:50212",
-}
+from hedera_sdk_python import Client, Network, AccountId, PrivateKey
 
-client_provider = HederaClientProvider(
-    network_name="custom",
-    operator_config=OperatorConfig(account_id=OPERATOR_ID, private_key_der=OPERATOR_KEY_DER),
-    network_config=NetworkConfig(name="testnet", nodes=TESTNET_NODES, mirror_network="testnet"),
+TESTNET_NODES = [
+    ("0.testnet.hedera.com:50211", AccountId(0, 0, 3)),
+    ("1.testnet.hedera.com:50211", AccountId(0, 0, 4))
+]
+
+client = Client(
+    network=Network(network="testnet", nodes=TESTNET_NODES, mirror_address="hcs.testnet.mirrornode.hedera.com:5600"),
 )
+client.set_operator(AccountId.from_string("OPERATOR_ID"), private_key=PrivateKey.from_string("OPERATOR_KEY"))
 ```
 
 ## Cache implementation
@@ -67,9 +66,14 @@ Resolver classes that accept custom cache implementation:
 ### Example
 
 ```python
+from did_sdk_py import Cache, HederaDidResolver
+
+class CustomCache(Cache):
+  ...
+
 custom_cache_instance = CustomCache[str, object]()
 
-resolver = HederaDidResolver(client_provider, custom_cache_instance)
+resolver = HederaDidResolver(client, custom_cache_instance)
 ```
 
 ## Logger configuration

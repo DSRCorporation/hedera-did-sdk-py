@@ -44,7 +44,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.pyright]
-include = ["did_sdk_py"]
+include = ["did_sdk_py", "tests"]
 venvPath = "."
 venv = ".venv"
 executionEnvironments = [

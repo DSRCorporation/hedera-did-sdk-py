@@ -1,8 +1,9 @@
 import asyncio
 
 import pytest
+from hedera_sdk_python import Client
 
-from did_sdk_py import HederaClientProvider, HederaDid, HederaDidResolver
+from did_sdk_py import HederaDid, HederaDidResolver
 from did_sdk_py.utils.encoding import bytes_to_b58
 
 from .conftest import OPERATOR_KEY, OPERATOR_KEY_DER, OPERATOR_KEY_TYPE
@@ -11,9 +12,9 @@ from .conftest import OPERATOR_KEY, OPERATOR_KEY_DER, OPERATOR_KEY_TYPE
 @pytest.mark.flaky(retries=3, delay=1)
 @pytest.mark.asyncio(loop_scope="session")
 class TestHederaDidResolver:
-    async def test_returns_error_response(self, client_provider: HederaClientProvider):
+    async def test_returns_error_response(self, client: Client):
         """Returns error response"""
-        resolver = HederaDidResolver(client_provider)
+        resolver = HederaDidResolver(client)
 
         result = await resolver.resolve("did:hedera:testnet:nNCTE5bZdRmjm2obqJwS892jVLak_0.0.1")
         assert result == {
@@ -47,9 +48,9 @@ class TestHederaDidResolver:
             },
         }
 
-    async def test_returns_success_response(self, client_provider: HederaClientProvider, Something):
+    async def test_returns_success_response(self, client: Client, Something):
         """Returns success response"""
-        did = HederaDid(client_provider=client_provider, private_key_der=OPERATOR_KEY_DER)
+        did = HederaDid(client=client, private_key_der=OPERATOR_KEY_DER)
 
         await did.register()
         await did.add_service(
@@ -61,7 +62,7 @@ class TestHederaDidResolver:
         # Wait until changes are propagated to Hedera Mirror node
         await asyncio.sleep(5)
 
-        result = await HederaDidResolver(client_provider).resolve(did.identifier)
+        result = await HederaDidResolver(client).resolve(did.identifier)
 
         assert result == {
             "didDocument": {
@@ -95,9 +96,9 @@ class TestHederaDidResolver:
             },
         }
 
-    async def test_returns_deactivated_document(self, client_provider: HederaClientProvider):
+    async def test_returns_deactivated_document(self, client: Client):
         """Returns deactivated DID document"""
-        did = HederaDid(client_provider=client_provider, private_key_der=OPERATOR_KEY_DER)
+        did = HederaDid(client=client, private_key_der=OPERATOR_KEY_DER)
 
         await did.register()
         await did.delete()
@@ -107,7 +108,7 @@ class TestHederaDidResolver:
         # Wait until changes are propagated to Hedera Mirror node
         await asyncio.sleep(5)
 
-        result = await HederaDidResolver(client_provider).resolve(did.identifier)
+        result = await HederaDidResolver(client).resolve(did.identifier)
 
         assert result == {
             "didDocument": {

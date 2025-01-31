@@ -1,11 +1,10 @@
 import logging
 from typing import Literal, cast
 
-from hedera_sdk_python import PrivateKey, PublicKey, TopicMessageSubmitTransaction
+from hedera_sdk_python import Client, PrivateKey, PublicKey, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import HcsMessageResolver, HcsMessageTransaction, HcsTopicOptions, HcsTopicService
-from ..hedera_client_provider import HederaClientProvider
 from ..utils.encoding import multibase_encode
 from ..utils.keys import get_key_type
 from .did_document import DidDocument
@@ -37,19 +36,17 @@ class HederaDid:
     Class representing Hedera DID instance, provides access to DID management API.
 
     Args:
-        client_provider: Hedera Client provider
+        client: Hedera Client
         identifier: DID identifier (for existing DIDs)
         private_key_der: DID Owner (controller) private key encoded in DER format. Can be empty for read-only access
     """
 
-    def __init__(
-        self, client_provider: HederaClientProvider, identifier: str | None = None, private_key_der: str | None = None
-    ):
+    def __init__(self, client: Client, identifier: str | None = None, private_key_der: str | None = None):
         if not identifier and not private_key_der:
             raise DidException("'identifier' and 'private_key_der' cannot both be empty")
 
-        self._client = client_provider.get_client()
-        self._hcs_topic_service = HcsTopicService(client_provider)
+        self._client = client
+        self._hcs_topic_service = HcsTopicService(client)
 
         self._private_key = PrivateKey.from_string(private_key_der) if private_key_der else None
         self._key_type: SupportedKeyType | None = (

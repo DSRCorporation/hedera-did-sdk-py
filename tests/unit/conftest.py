@@ -1,11 +1,9 @@
 from dataclasses import dataclass
 
 import pytest
-from hedera_sdk_python.crypto.private_key import PrivateKey
-from hedera_sdk_python.crypto.public_key import PublicKey
+from hedera_sdk_python import Client, PrivateKey, PublicKey
 from pytest_mock import MockerFixture
 
-from did_sdk_py import HederaClientProvider
 from did_sdk_py.did.types import SupportedKeyType
 from did_sdk_py.utils.cache import MemoryCache
 
@@ -22,8 +20,8 @@ class TestKey:
 
 
 @pytest.fixture
-def mock_client_provider(mocker: MockerFixture):
-    MockHederaClientProvider = mocker.patch("did_sdk_py.HederaClientProvider", autospec=HederaClientProvider)
+def mock_client(mocker: MockerFixture):
+    MockHederaClientProvider = mocker.patch("hedera_sdk_python.Client", autospec=Client)
     return MockHederaClientProvider.return_value
 
 

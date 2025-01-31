@@ -1,9 +1,8 @@
 import os
 
 import pytest
-from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python import AccountId, Client, Network, PrivateKey
 
-from did_sdk_py import HederaClientProvider, OperatorConfig
 from did_sdk_py.utils.keys import get_key_type
 
 OPERATOR_ID: str = os.environ.get("OPERATOR_ID")  # pyright: ignore [reportAssignmentType]
@@ -21,10 +20,11 @@ OPERATOR_KEY_TYPE = get_key_type(OPERATOR_KEY)
 
 
 @pytest.fixture(scope="class")
-def client_provider():
-    client_provider = HederaClientProvider(
-        network_name="testnet",
-        operator_config=OperatorConfig(account_id=OPERATOR_ID, private_key_der=OPERATOR_KEY_DER),
-    )
-    yield client_provider
-    client_provider.dispose()
+def client():
+    client = Client(network=Network("testnet"))
+    client.set_operator(AccountId.from_string(OPERATOR_ID), private_key=OPERATOR_KEY)
+
+    yield client
+
+    # No dispose/close method implemented in native Hedera Python SDK
+    # client.dispose()

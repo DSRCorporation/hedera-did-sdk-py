@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from itertools import chain
 from typing import cast
 
-from hedera_sdk_python import PrivateKey, Timestamp, TopicMessageSubmitTransaction
+from hedera_sdk_python import Client, PrivateKey, Timestamp, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import (
@@ -14,7 +14,6 @@ from ..hcs import (
     HcsTopicOptions,
     HcsTopicService,
 )
-from ..hedera_client_provider import HederaClientProvider
 from ..utils.cache import Cache, MemoryCache
 from .models import (
     AnonCredsCredDef,
@@ -49,18 +48,18 @@ class HederaAnonCredsRegistry:
     """Anoncreds objects registry (resolver + registrar) implementation that leverage Hedera HCS as VDR.
 
     Args:
-        client_provider: Hedera Client provider
+        client: Hedera Client
         cache_instance: Custom cache instance. If not provided, in-memory cache is used
     """
 
     def __init__(
         self,
-        client_provider: HederaClientProvider,
+        client: Client,
         cache_instance: Cache[str, object] | None = None,
     ):
-        self._client = client_provider.get_client()
-        self._hcs_file_service = HcsFileService(client_provider)
-        self._hcs_topic_service = HcsTopicService(client_provider)
+        self._client = client
+        self._hcs_file_service = HcsFileService(client)
+        self._hcs_topic_service = HcsTopicService(client)
 
         cache_instance = cache_instance or MemoryCache[str, object]()
 

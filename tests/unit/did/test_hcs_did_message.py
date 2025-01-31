@@ -9,12 +9,12 @@ from .common import DID_TOPIC_ID_1, DID_TOPIC_ID_2, IDENTIFIER
 
 
 class TestHcsDidMessage:
-    def test_valid_message(self, mock_client_provider, test_key):
+    def test_valid_message(self, mock_client, test_key):
         """Test valid message"""
         did = HederaDid(
             identifier=IDENTIFIER,
             private_key_der=test_key.private_key.to_string(),
-            client_provider=mock_client_provider,
+            client=mock_client,
         )
 
         message = HcsDidMessage(
@@ -30,12 +30,12 @@ class TestHcsDidMessage:
 
         assert message.is_valid(DID_TOPIC_ID_1)
 
-    def test_invalid_did(self, mock_client_provider, test_key):
+    def test_invalid_did(self, mock_client, test_key):
         """Test Invalid Did"""
         did = HederaDid(
             identifier=IDENTIFIER,
             private_key_der=test_key.private_key.to_string(),
-            client_provider=mock_client_provider,
+            client=mock_client,
         )
 
         message = HcsDidMessage(
@@ -51,12 +51,12 @@ class TestHcsDidMessage:
 
         assert not message.is_valid()
 
-    def test_invalid_topic(self, mock_client_provider, test_key):
+    def test_invalid_topic(self, mock_client, test_key):
         """Test Invalid Topic"""
         did = HederaDid(
             identifier=IDENTIFIER,
             private_key_der=test_key.private_key.to_string(),
-            client_provider=mock_client_provider,
+            client=mock_client,
         )
 
         message = HcsDidMessage(

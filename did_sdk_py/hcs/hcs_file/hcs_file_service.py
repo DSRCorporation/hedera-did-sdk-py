@@ -3,10 +3,9 @@ import re
 from hashlib import sha256
 from typing import cast
 
-from hedera_sdk_python import PrivateKey, TopicMessageSubmitTransaction
+from hedera_sdk_python import Client, PrivateKey, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
-from ...hedera_client_provider import HederaClientProvider
 from ..hcs_message_resolver import HcsMessageResolver
 from ..hcs_message_transaction import HcsMessageTransaction
 from ..hcs_topic_service import HcsTopicOptions, HcsTopicService
@@ -23,9 +22,9 @@ LOGGER = logging.getLogger(__name__)
 class HcsFileService:
     """Provides API for managing files on Hedera HCS according to HCS-1 standard"""
 
-    def __init__(self, client_provider: HederaClientProvider):
-        self._client = client_provider.get_client()
-        self._hcs_topic_service = HcsTopicService(client_provider)
+    def __init__(self, client: Client):
+        self._client = client
+        self._hcs_topic_service = HcsTopicService(client)
 
     async def submit_file(self, payload: bytes, submit_key_der: str) -> str:
         """Submit new file to HCS"""

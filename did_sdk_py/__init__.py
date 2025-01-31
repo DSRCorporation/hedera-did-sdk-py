@@ -14,7 +14,6 @@ from .anoncreds import (
     RevRegDefValue,
 )
 from .did import DidDocument, DidErrorCode, DidException, HederaDid, HederaDidResolver
-from .hedera_client_provider import HederaClientProvider, NetworkConfig, NetworkName, OperatorConfig
 from .utils.cache import Cache, MemoryCache
 from .utils.logger import LogLevel, configure_logger
 
@@ -41,10 +40,6 @@ __all__ = [
     "AnonCredsRevRegDef",
     "RevRegDefValue",
     "AnonCredsRevList",
-    "HederaClientProvider",
-    "OperatorConfig",
-    "NetworkName",
-    "NetworkConfig",
     "Cache",
     "MemoryCache",
 ]
