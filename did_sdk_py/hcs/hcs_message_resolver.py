@@ -4,8 +4,7 @@ import time
 from asyncio import Future
 from threading import Timer
 
-from hedera_sdk_python.client.client import Client
-from hedera_sdk_python.timestamp import Timestamp
+from hedera_sdk_python import Client, Timestamp
 
 from .hcs_message import HcsMessage, HcsMessageWithResponseMetadata
 from .hcs_message_envelope import HcsMessageEnvelope

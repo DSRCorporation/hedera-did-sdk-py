@@ -1,5 +1,4 @@
-from hedera_sdk_python.crypto.private_key import PrivateKey
-from hedera_sdk_python.crypto.public_key import PublicKey
+from hedera_sdk_python import PrivateKey, PublicKey
 
 from ..did.types import SupportedKeyType
 

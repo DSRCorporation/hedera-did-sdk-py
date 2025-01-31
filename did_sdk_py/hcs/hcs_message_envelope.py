@@ -1,4 +1,4 @@
-from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python import PrivateKey
 
 from ..utils.encoding import bytes_to_b64
 from .hcs_message import HcsMessage

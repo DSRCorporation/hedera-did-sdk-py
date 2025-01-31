@@ -3,8 +3,7 @@ import re
 from hashlib import sha256
 from typing import cast
 
-from hedera_sdk_python.consensus.topic_message_submit_transaction import TopicMessageSubmitTransaction
-from hedera_sdk_python.crypto.private_key import PrivateKey
+from hedera_sdk_python import PrivateKey, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
 from ...hedera_client_provider import HederaClientProvider

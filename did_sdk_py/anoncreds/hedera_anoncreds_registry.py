@@ -3,9 +3,7 @@ from collections.abc import Sequence
 from itertools import chain
 from typing import cast
 
-from hedera_sdk_python.consensus.topic_message_submit_transaction import TopicMessageSubmitTransaction
-from hedera_sdk_python.crypto.private_key import PrivateKey
-from hedera_sdk_python.timestamp import Timestamp
+from hedera_sdk_python import PrivateKey, Timestamp, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import (

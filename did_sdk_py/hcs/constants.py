@@ -1,4 +1,4 @@
-from hedera_sdk_python.hbar import Hbar
+from hedera_sdk_python import Hbar
 
 MAX_TRANSACTION_FEE = Hbar(2)
 

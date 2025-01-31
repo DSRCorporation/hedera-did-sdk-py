@@ -1,11 +1,8 @@
 import logging
 from collections.abc import Callable
 
-from hedera_sdk_python.client.client import Client
-from hedera_sdk_python.consensus.topic_id import TopicId
+from hedera_sdk_python import Client, Timestamp, TopicId, TopicMessageQuery
 from hedera_sdk_python.consensus.topic_message import TopicMessage
-from hedera_sdk_python.query.topic_message_query import TopicMessageQuery
-from hedera_sdk_python.timestamp import Timestamp
 
 from .hcs_message import HcsMessage, HcsMessageWithResponseMetadata
 

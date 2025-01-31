@@ -1,9 +1,7 @@
 import logging
 from typing import Literal, cast
 
-from hedera_sdk_python.consensus.topic_message_submit_transaction import TopicMessageSubmitTransaction
-from hedera_sdk_python.crypto.private_key import PrivateKey
-from hedera_sdk_python.crypto.public_key import PublicKey
+from hedera_sdk_python import PrivateKey, PublicKey, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import HcsMessageResolver, HcsMessageTransaction, HcsTopicOptions, HcsTopicService

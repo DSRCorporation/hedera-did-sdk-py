@@ -8,5 +8,5 @@
 The repository contains the Python SDK for managing DID Documents and AnonCreds Verifiable Credentials registry using
 Hedera Consensus Service.
 
-This library is using [community-made Hedera Python SDK](https://github.com/wensheng/hedera-sdk-py), which is a Python
-wrapper over [Hedera Java SDK](https://github.com/hashgraph/hedera-sdk-java).
+TODO: Update package link
+This library is using [Hiero Python SDK](https://github.com/nadineloepfe/hedera_sdk_python).

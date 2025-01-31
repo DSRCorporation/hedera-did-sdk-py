@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
-from hedera_sdk_python.crypto.public_key import PublicKey
+from hedera_sdk_python import PublicKey
 
 from .....did.types import SupportedKeyType
 from .....utils.encoding import b58_to_bytes, bytes_to_b58

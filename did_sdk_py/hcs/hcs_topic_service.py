@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 
-from hedera_sdk_python.consensus.topic_create_transaction import TopicCreateTransaction
-from hedera_sdk_python.consensus.topic_id import TopicId
+from hedera_sdk_python import (
+    PrivateKey,
+    PublicKey,
+    TopicCreateTransaction,
+    TopicId,
+    TopicInfoQuery,
+    TopicUpdateTransaction,
+)
 from hedera_sdk_python.consensus.topic_info import TopicInfo
-from hedera_sdk_python.consensus.topic_update_transaction import TopicUpdateTransaction
-from hedera_sdk_python.crypto.private_key import PrivateKey
-from hedera_sdk_python.crypto.public_key import PublicKey
-from hedera_sdk_python.query.topic_info_query import TopicInfoQuery
 
 from ..hedera_client_provider import HederaClientProvider
 from .utils import execute_hcs_query_async, execute_hcs_transaction_async, sign_hcs_transaction_async

@@ -1,8 +1,6 @@
 from collections.abc import Callable
 
-from hedera_sdk_python.client.client import Client
-from hedera_sdk_python.consensus.topic_id import TopicId
-from hedera_sdk_python.consensus.topic_message_submit_transaction import TopicMessageSubmitTransaction
+from hedera_sdk_python import Client, TopicId, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
 from .hcs_message import HcsMessage

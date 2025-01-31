@@ -1,12 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from hedera_sdk_python.account.account_id import AccountId
-from hedera_sdk_python.client.client import Client
-from hedera_sdk_python.client.network import Network
-from hedera_sdk_python.crypto.private_key import PrivateKey
-
-from .utils.serializable import Serializable
+from hedera_sdk_python import AccountId, Client, Network, PrivateKey
 
 NetworkName = Literal["mainnet", "testnet", "previewnet"]
 
@@ -25,22 +20,15 @@ class OperatorConfig:
 
 
 @dataclass(frozen=True)
-class NetworkConfig(Serializable):
+class NetworkConfig:
     """Hedera network config.
 
     Should be used only for customization purposes, if it's not needed - use default configurations instead.
     """
 
     name: NetworkName
-    nodes: dict[str, str]
-    mirror_network: str | list[str]
-
-    @classmethod
-    def from_json_payload(cls, payload: dict):
-        raise Exception("Not implemented")
-
-    def get_json_payload(self):
-        return {"network": self.nodes, "mirrorNetwork": self.mirror_network}
+    nodes: list[tuple[str, AccountId]]
+    mirror_address: str | None = None
 
 
 class HederaClientProvider:
@@ -64,10 +52,7 @@ class HederaClientProvider:
         if network_name == "custom":
             if not network_config:
                 raise Exception("Network config is required for custom network configuration")
-            # Native Python SDK supports only single node in custom network
-            node_account_id, node_address = network_config.nodes.popitem()
-
-            self._client = Client(Network(node_account_id=node_account_id, node_address=node_address))
+            self._client = Client(Network(**network_config.__dict__))
         elif network_config:
             raise Exception("Network config is supported only for custom network configuration")
         else:
