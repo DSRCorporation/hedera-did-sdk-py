@@ -208,7 +208,7 @@ class TestDidDocument:
     async def test_handle_change_did_owner_event(self, test_key):
         """handles change DID owner event"""
         other_owner_key = PrivateKey.generate()
-        other_owner_identifier = f"did:hedera:testnet:{multibase_encode(bytes(other_owner_key.public_key().to_bytes_raw()), 'base58btc')}_0.0.29999999"
+        other_owner_identifier = f"did:hedera:testnet:{multibase_encode(bytes(other_owner_key.public_key().to_bytes_raw()), "base58btc")}_0.0.29999999"
 
         key2 = PrivateKey.generate()
         key2_type = get_key_type(key2)

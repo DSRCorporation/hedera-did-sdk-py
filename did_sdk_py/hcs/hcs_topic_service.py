@@ -36,8 +36,8 @@ def _set_topic_transaction_options(transaction: TopicTransaction, topic_options:
     max_transaction_fee = (
         Hbar(topic_options.max_transaction_fee_hbar) if topic_options.max_transaction_fee_hbar else MAX_TRANSACTION_FEE
     )
-
     transaction.transaction_fee = max_transaction_fee.to_tinybars()
+
     transaction.set_submit_key(topic_options.submit_key)
 
     return transaction

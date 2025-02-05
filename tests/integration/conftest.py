@@ -27,4 +27,5 @@ def client():
     yield client
 
     # No dispose/close method implemented in native Hedera Python SDK
+    # See GH issue: https://github.com/hiero-ledger/hiero-sdk-python/issues/43
     # client.dispose()
