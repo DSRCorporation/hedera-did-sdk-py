@@ -14,10 +14,8 @@ from .common import DID_TOPIC_ID_1, IDENTIFIER
 
 
 @pytest.fixture
-def transaction(mock_client_provider, test_key):
-    did = HederaDid(
-        identifier=IDENTIFIER, private_key_der=test_key.private_key.toStringDER(), client_provider=mock_client_provider
-    )
+def transaction(mock_client, test_key):
+    did = HederaDid(identifier=IDENTIFIER, private_key_der=test_key.private_key.to_string(), client=mock_client)
 
     message = HcsDidMessage(
         DidDocumentOperation.CREATE,
@@ -38,10 +36,10 @@ def transaction(mock_client_provider, test_key):
 class TestHcsDidTransaction:
     @patch("did_sdk_py.hcs.hcs_message_transaction.execute_hcs_transaction_async")
     @pytest.mark.asyncio
-    async def test_execute(self, mock_execute_transaction, transaction, mock_client_provider, Something):
+    async def test_execute(self, mock_execute_transaction, transaction, mock_client, Something):
         mock_execute_transaction.return_value = {}
 
-        await transaction.execute(mock_client_provider.get_client())
+        await transaction.execute(mock_client)
 
         mock_execute_transaction.assert_awaited_once()
-        mock_execute_transaction.assert_awaited_with(Something, mock_client_provider.get_client())
+        mock_execute_transaction.assert_awaited_with(Something, mock_client)

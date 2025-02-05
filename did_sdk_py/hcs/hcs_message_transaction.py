@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
-from hedera import Client, TopicId, TopicMessageSubmitTransaction, Transaction
+from hedera_sdk_python import Client, TopicId, TopicMessageSubmitTransaction
+from hedera_sdk_python.transaction.transaction import Transaction
 
 from .hcs_message import HcsMessage
 from .utils import execute_hcs_transaction_async
@@ -28,8 +29,8 @@ class HcsMessageTransaction:
 
         message_content = self.message.to_json()
 
-        transaction = (
-            TopicMessageSubmitTransaction().setTopicId(TopicId.fromString(self.topic_id)).setMessage(message_content)
+        transaction = TopicMessageSubmitTransaction(
+            topic_id=TopicId.from_string(self.topic_id), message=message_content
         )
 
         if self._transaction_builder:

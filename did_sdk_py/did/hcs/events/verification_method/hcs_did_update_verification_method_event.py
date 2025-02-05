@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import ClassVar
 
-from hedera import PublicKey
+from hedera_sdk_python import PublicKey
 
 from .....utils.encoding import b58_to_bytes, bytes_to_b58
 from ....types import SupportedKeyType
@@ -27,7 +27,7 @@ class HcsDidUpdateVerificationMethodEvent(HcsDidEvent):
             "id": self.id_,
             "type": self.type_,
             "controller": self.controller,
-            "publicKeyBase58": bytes_to_b58(bytes(self.public_key.toBytesRaw())),
+            "publicKeyBase58": bytes_to_b58(self.public_key.to_bytes_raw()),
         }
 
     @classmethod
@@ -35,7 +35,7 @@ class HcsDidUpdateVerificationMethodEvent(HcsDidEvent):
         event_json = payload[cls.event_target]
         match event_json:
             case {"id": id_, "type": type_, "controller": controller, "publicKeyBase58": public_key_base58}:
-                public_key = PublicKey.fromBytes(b58_to_bytes(public_key_base58))
+                public_key = PublicKey.from_bytes(b58_to_bytes(public_key_base58))
                 return cls(id_=id_, type_=type_, controller=controller, public_key=public_key)
             case _:
                 raise Exception(f"{cls.__name__} JSON parsing failed: Invalid JSON structure")

@@ -3,7 +3,8 @@ from collections.abc import Sequence
 from itertools import chain
 from typing import cast
 
-from hedera import PrivateKey, TopicMessageSubmitTransaction, Transaction
+from hedera_sdk_python import Client, PrivateKey, Timestamp, TopicMessageSubmitTransaction
+from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import (
     HcsFileService,
@@ -14,9 +15,7 @@ from ..hcs import (
     HcsTopicService,
 )
 from ..hcs.constants import MAX_TRANSACTION_FEE
-from ..hedera_client_provider import HederaClientProvider
 from ..utils.cache import Cache, MemoryCache
-from ..utils.timestamp import Timestamp
 from .models import (
     AnonCredsCredDef,
     AnonCredsRevList,
@@ -50,18 +49,18 @@ class HederaAnonCredsRegistry:
     """Anoncreds objects registry (resolver + registrar) implementation that leverage Hedera HCS as VDR.
 
     Args:
-        client_provider: Hedera Client provider
+        client: Hedera Client
         cache_instance: Custom cache instance. If not provided, in-memory cache is used
     """
 
     def __init__(
         self,
-        client_provider: HederaClientProvider,
+        client: Client,
         cache_instance: Cache[str, object] | None = None,
     ):
-        self._client = client_provider.get_client()
-        self._hcs_file_service = HcsFileService(client_provider)
-        self._hcs_topic_service = HcsTopicService(client_provider)
+        self._client = client
+        self._hcs_file_service = HcsFileService(client)
+        self._hcs_topic_service = HcsTopicService(client)
 
         cache_instance = cache_instance or MemoryCache[str, object]()
 
@@ -331,9 +330,9 @@ class HederaAnonCredsRegistry:
             object: Revocation registry definition registration result
         """
         try:
-            issuer_key = PrivateKey.fromString(issuer_key_der)
+            issuer_key = PrivateKey.from_string(issuer_key_der)
 
-            entries_topic_options = HcsTopicOptions(submit_key=issuer_key.getPublicKey())
+            entries_topic_options = HcsTopicOptions(submit_key=issuer_key.public_key())
             entries_topic_id = await self._hcs_topic_service.create_topic(entries_topic_options, [issuer_key])
 
             rev_reg_def_with_metadata = RevRegDefWithHcsMetadata(
@@ -471,7 +470,7 @@ class HederaAnonCredsRegistry:
                 # If returned entries list is empty, we need to fetch the first message and check if list is registered
                 # It's possible that requested timestamp is before the actual registration of rev list -> we want to return initial state for the list (by adding first message to entries)
 
-                # The second request looks redundant here, but it should be the rare case that will e subsequently handled by cache
+                # The second request looks redundant here, but it should be the rare case that will be subsequently handled by cache
                 entries_messages = await HcsMessageResolver(
                     topic_id=entries_topic_id,
                     message_type=HcsRevRegEntryMessage,
@@ -507,7 +506,7 @@ class HederaAnonCredsRegistry:
                 revocation_registry_id=rev_reg_id,
                 resolution_metadata={
                     "error": "otherError",
-                    "message": f"unable to resolve revocation list: ${error!s}",
+                    "message": f"Unable to resolve revocation list: ${error!s}",
                 },
                 revocation_list_metadata={},
             )
@@ -613,11 +612,8 @@ class HederaAnonCredsRegistry:
         def build_message_submit_transaction(
             message_submit_transaction: TopicMessageSubmitTransaction,
         ) -> Transaction:
-            return (
-                message_submit_transaction.setMaxTransactionFee(MAX_TRANSACTION_FEE)
-                .freezeWith(self._client)
-                .sign(PrivateKey.fromString(issuer_key_der))
-            )
+            message_submit_transaction.transaction_fee = MAX_TRANSACTION_FEE.to_tinybars()  # pyright: ignore [reportAttributeAccessIssue]
+            return message_submit_transaction.freeze_with(self._client).sign(PrivateKey.from_string(issuer_key_der))
 
         await HcsMessageTransaction(entries_topic_id, entry_message, build_message_submit_transaction).execute(
             self._client

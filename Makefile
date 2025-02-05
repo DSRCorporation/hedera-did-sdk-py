@@ -24,12 +24,12 @@ test:
 .PHONY: test-unit
 test-unit:
 	@echo "🚀 Testing code: Running pytest (unit tests only)"
-	@HEDERA_DID_SDK_LOG_LEVEL="DEBUG" HEDERA_DID_SDK_LOG_FORMAT="%d %level: %logger: %msg%n" poetry run pytest -s --verbose ./tests/unit
+	@HEDERA_DID_SDK_LOG_LEVEL="DEBUG" HEDERA_DID_SDK_LOG_FORMAT="%(asctime)s %(levelname)s: %(filename)s: %(message)s" poetry run pytest -s --verbose ./tests/unit
 
 .PHONY: test-integration
 test-integration:
 	@echo "🚀 Testing code: Running pytest (integration tests only)"
-	@HEDERA_DID_SDK_LOG_LEVEL="DEBUG" HEDERA_DID_SDK_LOG_FORMAT="%d %level: %logger: %msg%n" poetry run pytest -s --verbose ./tests/integration
+	@HEDERA_DID_SDK_LOG_LEVEL="DEBUG" HEDERA_DID_SDK_LOG_FORMAT="%(asctime)s %(levelname)s: %(filename)s: %(message)s" poetry run pytest -s --verbose ./tests/integration
 
 .PHONY: build
 build: clean ## Build wheel file using poetry

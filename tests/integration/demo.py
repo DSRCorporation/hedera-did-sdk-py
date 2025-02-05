@@ -3,7 +3,7 @@ import json
 import time
 
 import pytest
-from hedera import PrivateKey
+from hedera_sdk_python import Client, PrivateKey
 
 from did_sdk_py import (
     AnonCredsCredDef,
@@ -14,12 +14,12 @@ from did_sdk_py import (
     CredDefValuePrimary,
     CredDefValueRevocation,
     HederaAnonCredsRegistry,
-    HederaClientProvider,
     HederaDid,
     HederaDidResolver,
     RevRegDefValue,
 )
 from did_sdk_py.anoncreds.utils import parse_anoncreds_identifier
+from did_sdk_py.utils.keys import get_key_type
 
 # In real scenario, these credential definition values are provided by AnonCreds implementation
 
@@ -57,10 +57,10 @@ DEMO_REV_LIST_ACCUM = "21 1200126E528235C2C22071C3F573985E6E07F49217414A0490482B
 
 @pytest.mark.asyncio(loop_scope="session")
 class TestDemo:
-    async def test_demo(self, client_provider: HederaClientProvider):
+    async def test_demo(self, client: Client):
         # Create issuer private key and register Hedera DID
-        issuer_private_key = PrivateKey.generateECDSA()
-        issuer_did = HederaDid(client_provider=client_provider, private_key_der=issuer_private_key.toStringDER())
+        issuer_private_key = PrivateKey.generate_ed25519()
+        issuer_did = HederaDid(client=client, private_key_der=issuer_private_key.to_string())
 
         await issuer_did.register()
 
@@ -78,14 +78,14 @@ class TestDemo:
             service_endpoint="https://example.com/vcs",
         )
 
-        verification_key = PrivateKey.generateECDSA()
+        verification_key = PrivateKey.generate_ed25519()
 
         # Add DID Document Verification Method
         await issuer_did.add_verification_method(
             id_=f"{issuer_did.identifier}#key-1",
             controller=issuer_did.identifier,
-            public_key_der=verification_key.getPublicKey().toStringDER(),
-            type_="EcdsaSecp256k1VerificationKey2019",
+            public_key_der=verification_key.public_key().to_string(),
+            type_=get_key_type(verification_key),
         )
 
         print(
@@ -96,7 +96,7 @@ class TestDemo:
         await asyncio.sleep(5)
 
         # Create Hedera DID resolver instance
-        did_resolver = HederaDidResolver(client_provider)
+        did_resolver = HederaDidResolver(client)
 
         print("Resolving issuer DID document...")
 
@@ -109,7 +109,7 @@ class TestDemo:
         print(json.dumps(did_document, indent=2, default=str))
 
         # Create Hedera AnonCreds registry instance
-        anoncreds_registry = HederaAnonCredsRegistry(client_provider)
+        anoncreds_registry = HederaAnonCredsRegistry(client)
 
         # AnonCreds schema write/read flow
 
@@ -119,7 +119,7 @@ class TestDemo:
 
         print("Registering AnonCreds schema...")
 
-        schema_registration_result = await anoncreds_registry.register_schema(schema, issuer_private_key.toStringDER())
+        schema_registration_result = await anoncreds_registry.register_schema(schema, issuer_private_key.to_string())
         assert schema_registration_result.schema_state.state == "finished"
 
         schema_identifier = schema_registration_result.schema_state.schema_id
@@ -157,7 +157,7 @@ class TestDemo:
         print("Registering AnonCreds credential definition...")
 
         cred_def_registration_result = await anoncreds_registry.register_cred_def(
-            cred_def, issuer_private_key.toStringDER()
+            cred_def, issuer_private_key.to_string()
         )
         assert cred_def_registration_result.credential_definition_state.state == "finished"
 
@@ -196,7 +196,7 @@ class TestDemo:
         print("Registering AnonCreds revocation registry...")
 
         rev_reg_def_registration_result = await anoncreds_registry.register_rev_reg_def(
-            rev_reg_def, issuer_private_key.toStringDER()
+            rev_reg_def, issuer_private_key.to_string()
         )
         assert rev_reg_def_registration_result.revocation_registry_definition_state.state == "finished"
 
@@ -250,7 +250,7 @@ class TestDemo:
         print("Registering AnonCreds revocation list...")
 
         rev_list_registration_result = await anoncreds_registry.register_rev_list(
-            rev_list, issuer_private_key.toStringDER()
+            rev_list, issuer_private_key.to_string()
         )
         assert rev_list_registration_result.revocation_list_state.state == "finished"
 
@@ -276,7 +276,7 @@ class TestDemo:
             prev_list=rev_list,
             curr_list=updated_rev_list,
             revoked=[0, 9],
-            issuer_key_der=issuer_private_key.toStringDER(),
+            issuer_key_der=issuer_private_key.to_string(),
         )
         assert rev_list_update_result.revocation_list_state.state == "finished"
 

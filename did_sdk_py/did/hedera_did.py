@@ -1,16 +1,11 @@
 import logging
 from typing import Literal, cast
 
-from hedera import (
-    PrivateKey,
-    PublicKey,
-    TopicMessageSubmitTransaction,
-    Transaction,
-)
+from hedera_sdk_python import Client, PrivateKey, PublicKey, TopicMessageSubmitTransaction
+from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import HcsMessageResolver, HcsMessageTransaction, HcsTopicOptions, HcsTopicService
 from ..hcs.constants import MAX_TRANSACTION_FEE
-from ..hedera_client_provider import HederaClientProvider
 from ..utils.encoding import multibase_encode
 from ..utils.keys import get_key_type
 from .did_document import DidDocument
@@ -42,21 +37,19 @@ class HederaDid:
     Class representing Hedera DID instance, provides access to DID management API.
 
     Args:
-        client_provider: Hedera Client provider
+        client: Hedera Client
         identifier: DID identifier (for existing DIDs)
         private_key_der: DID Owner (controller) private key encoded in DER format. Can be empty for read-only access
     """
 
-    def __init__(
-        self, client_provider: HederaClientProvider, identifier: str | None = None, private_key_der: str | None = None
-    ):
+    def __init__(self, client: Client, identifier: str | None = None, private_key_der: str | None = None):
         if not identifier and not private_key_der:
             raise DidException("'identifier' and 'private_key_der' cannot both be empty")
 
-        self._client = client_provider.get_client()
-        self._hcs_topic_service = HcsTopicService(client_provider)
+        self._client = client
+        self._hcs_topic_service = HcsTopicService(client)
 
-        self._private_key = PrivateKey.fromString(private_key_der) if private_key_der else None
+        self._private_key = PrivateKey.from_string(private_key_der) if private_key_der else None
         self._key_type: SupportedKeyType | None = (
             cast(SupportedKeyType, get_key_type(self._private_key)) if self._private_key else None
         )
@@ -83,22 +76,22 @@ class HederaDid:
                 raise DidException("DID is already registered")
         else:
             topic_options = HcsTopicOptions(
-                admin_key=self._private_key.getPublicKey(), submit_key=self._private_key.getPublicKey()
+                admin_key=self._private_key.public_key(), submit_key=self._private_key.public_key()
             )
 
             self.topic_id = await self._hcs_topic_service.create_topic(topic_options, [self._private_key])
 
-            self.network = self._client.ledgerId.toString()
+            self.network = self._client.network.network
             self.identifier = build_identifier(
                 self.network,
-                multibase_encode(bytes(self._private_key.getPublicKey().toBytesRaw()), "base58btc"),
+                multibase_encode(bytes(self._private_key.public_key().to_bytes_raw()), "base58btc"),
                 self.topic_id,
             )
 
         hcs_event = HcsDidUpdateDidOwnerEvent(
             id_=f"{self.identifier}#did-root-key",
             controller=self.identifier,
-            public_key=self._private_key.getPublicKey(),
+            public_key=self._private_key.public_key(),
             type_=self._key_type,
         )
 
@@ -118,14 +111,14 @@ class HederaDid:
         if not document.controller:
             raise DidException("DID is not registered or was recently deleted. DID has to be registered first")
 
-        new_private_key = PrivateKey.fromString(new_private_key_der)
+        new_private_key = PrivateKey.from_string(new_private_key_der)
         new_key_type = get_key_type(new_private_key)
 
         topic_update_options = HcsTopicOptions(
-            admin_key=new_private_key.getPublicKey(), submit_key=new_private_key.getPublicKey()
+            admin_key=new_private_key.public_key(), submit_key=new_private_key.public_key()
         )
         await self._hcs_topic_service.update_topic(
-            cast(str, self.topic_id), topic_update_options, [self._private_key, new_private_key]
+            cast(str, self.topic_id), topic_update_options, [cast(PrivateKey, self._private_key), new_private_key]
         )
 
         self._private_key = new_private_key
@@ -134,7 +127,7 @@ class HederaDid:
         hcs_event = HcsDidUpdateDidOwnerEvent(
             id_=f"{self.identifier}#did-root-key",
             controller=controller,
-            public_key=self._private_key.getPublicKey(),
+            public_key=self._private_key.public_key(),
             type_=self._key_type,
         )
 
@@ -215,7 +208,7 @@ class HederaDid:
             DidDocumentOperation.CREATE,
             id_=id_,
             controller=controller,
-            public_key=PublicKey.fromString(public_key_der),
+            public_key=PublicKey.from_string(public_key_der),
             type_=type_,
         )
 
@@ -238,7 +231,7 @@ class HederaDid:
             DidDocumentOperation.UPDATE,
             id_=id_,
             controller=controller,
-            public_key=PublicKey.fromString(public_key_der),
+            public_key=PublicKey.from_string(public_key_der),
             type_=type_,
         )
 
@@ -274,7 +267,7 @@ class HederaDid:
             DidDocumentOperation.CREATE,
             id_=id_,
             controller=controller,
-            public_key=PublicKey.fromString(public_key_der),
+            public_key=PublicKey.from_string(public_key_der),
             relationship_type=relationship_type,
             type_=type_,
         )
@@ -299,7 +292,7 @@ class HederaDid:
         await self._add_or_update_verification_relationship(
             DidDocumentOperation.UPDATE,
             id_=id_,
-            public_key=PublicKey.fromString(public_key_der),
+            public_key=PublicKey.from_string(public_key_der),
             controller=controller,
             relationship_type=relationship_type,
             type_=type_,
@@ -326,11 +319,8 @@ class HederaDid:
         envelope.sign(self._private_key)
 
         def build_did_transaction(message_submit_transaction: TopicMessageSubmitTransaction) -> Transaction:
-            return (
-                message_submit_transaction.setMaxTransactionFee(MAX_TRANSACTION_FEE)
-                .freezeWith(self._client)
-                .sign(self._private_key)
-            )
+            message_submit_transaction.transaction_fee = MAX_TRANSACTION_FEE.to_tinybars()  # pyright: ignore [reportAttributeAccessIssue]
+            return message_submit_transaction.freeze_with(self._client).sign(self._private_key)
 
         await HcsMessageTransaction(self.topic_id, envelope, build_did_transaction).execute(self._client)
 

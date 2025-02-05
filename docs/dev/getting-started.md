@@ -3,14 +3,10 @@
 ## Prerequisites
 
 - Python 3.12+
-- JDK 21 (required for Hedera Python SDK which is a wrapper around Java SDK)
-    - The Temurin builds of [Eclipse Adoptium](https://adoptium.net/) are strongly recommended
-    - IMPORTANT: Java environment setup significantly impacts Python <-> Java interop stability, please consider using
-      recommended version even if you find that SDK works on a different version
 
 ## Install from PyPi
 
-TODO: update package namespace
+TODO: update package namespace once moved to Hiero
 
 ```bash
 pip install hedera-did-sdk-py
@@ -25,19 +21,24 @@ For more complex examples, please refer to SDK integration tests:
 - [Hedera DID](https://github.com/hashgraph/did-sdk-py/blob/main/tests/integration/test_hedera_did.py)
 - [AnonCreds registry](https://github.com/hashgraph/did-sdk-py/blob/main/tests/integration/test_hedera_anoncreds_registry.py)
 
-### Create Hedera Client provider (for testnet)
+### Create Hedera Client (for testnet)
 
 ```python
-client_provider = HederaClientProvider(
-    network_name="testnet",
-    operator_config=OperatorConfig(account_id=OPERATOR_ID, private_key_der=OPERATOR_KEY_DER)
+from hedera_sdk_python import Client, Network, AccountId, PrivateKey
+
+client = Client(
+    network=Network("testnet")
 )
+
+client.set_operator(AccountId.from_string("OPERATOR_ID"), private_key=PrivateKey.from_string("OPERATOR_KEY"))
 ```
 
 ### Register new Hedera DID on testnet network and add DID service
 
 ```python
-did = HederaDid(client_provider=client_provider, private_key_der=private_key_der)
+from did_sdk_py import HederaDid
+
+did = HederaDid(client=client, private_key_der="private_key_der")
 
 await did.register()
 
@@ -49,7 +50,9 @@ await did.add_service(
 ### Resolve existing Hedera DID
 
 ```python
-resolver = HederaDidResolver(client_provider)
+from did_sdk_py import HederaDidResolver
+
+resolver = HederaDidResolver(client)
 
 resolution_result = await resolver.resolve(
     "did:hedera:testnet:zvAQyPeUecGck2EsxcsihxhAB6jZurFrBbj2gC7CNkS5o_0.0.5063027")
@@ -58,8 +61,10 @@ resolution_result = await resolver.resolve(
 ### Create AnonCreds credential schema and credential definition
 
 ```python
+from did_sdk_py import HederaAnonCredsRegistry, AnonCredsSchema, AnonCredsCredDef, CredDefValue, CredDefValuePrimary
+
 issuer_did = "did:hedera:testnet:zvAQyPeUecGck2EsxcsihxhAB6jZurFrBbj2gC7CNkS5o_0.0.5063027"
-registry = HederaAnonCredsRegistry(client_provider)
+registry = HederaAnonCredsRegistry(client)
 
 schema = AnonCredsSchema(
     name="schema-name",
@@ -68,7 +73,7 @@ schema = AnonCredsSchema(
     version="1"
 )
 
-schema_registration_result = await registry.register_schema(schema, issuer_did, OPERATOR_KEY_DER)
+schema_registration_result = await registry.register_schema(schema, issuer_did, "OPERATOR_KEY_DER")
 
 cred_def = AnonCredsCredDef(
     schema_id=schema_registration_result.schema_state.schema_id,
@@ -77,5 +82,5 @@ cred_def = AnonCredsCredDef(
     tag="cred-def-tag"
 )
 
-cred_def_registration_result = await registry.register_cred_def(cred_def, issuer_did, OPERATOR_KEY_DER)
+cred_def_registration_result = await registry.register_cred_def(cred_def, issuer_did, "OPERATOR_KEY_DER")
 ```

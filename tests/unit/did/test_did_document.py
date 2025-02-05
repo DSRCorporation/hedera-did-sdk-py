@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-from hedera import PrivateKey
+from hedera_sdk_python import PrivateKey
 
 from did_sdk_py.did.did_document import DidDocument
 from did_sdk_py.did.did_document_operation import DidDocumentOperation
@@ -208,7 +208,7 @@ class TestDidDocument:
     async def test_handle_change_did_owner_event(self, test_key):
         """handles change DID owner event"""
         other_owner_key = PrivateKey.generate()
-        other_owner_identifier = f"did:hedera:testnet:{multibase_encode(bytes(other_owner_key.getPublicKey().toBytes()), "base58btc")}_0.0.29999999"
+        other_owner_identifier = f"did:hedera:testnet:{multibase_encode(bytes(other_owner_key.public_key().to_bytes_raw()), "base58btc")}_0.0.29999999"
 
         key2 = PrivateKey.generate()
         key2_type = get_key_type(key2)
@@ -225,7 +225,11 @@ class TestDidDocument:
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-2", key2.getPublicKey(), IDENTIFIER_2, "capabilityDelegation", key2_type
+                    f"{IDENTIFIER_2}#key-2",
+                    key2.public_key(),
+                    IDENTIFIER_2,
+                    "capabilityDelegation",
+                    key2_type,
                 ),
             ),
             HcsDidMessage(
@@ -261,7 +265,7 @@ class TestDidDocument:
                 {
                     "controller": IDENTIFIER_2,
                     "id": f"{IDENTIFIER_2}#key-2",
-                    "publicKeyBase58": bytes_to_b58(bytes(key2.getPublicKey().toBytes())),
+                    "publicKeyBase58": bytes_to_b58(bytes(key2.public_key().to_bytes_raw())),
                     "type": key2_type,
                 },
             ],
@@ -297,14 +301,14 @@ class TestDidDocument:
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationMethodEvent(
-                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.getPublicKey(), key1_type
+                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.public_key(), key1_type
                 ),
             ),
             HcsDidMessage(
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-2", key2.getPublicKey(), IDENTIFIER_2, "capabilityDelegation", key2_type
+                    f"{IDENTIFIER_2}#key-2", key2.public_key(), IDENTIFIER_2, "capabilityDelegation", key2_type
                 ),
             ),
         ]
@@ -336,13 +340,13 @@ class TestDidDocument:
                 {
                     "controller": IDENTIFIER_2,
                     "id": f"{IDENTIFIER_2}#key-1",
-                    "publicKeyBase58": bytes_to_b58(bytes(key1.getPublicKey().toBytes())),
+                    "publicKeyBase58": bytes_to_b58(bytes(key1.public_key().to_bytes_raw())),
                     "type": key1_type,
                 },
                 {
                     "controller": IDENTIFIER_2,
                     "id": f"{IDENTIFIER_2}#key-2",
-                    "publicKeyBase58": bytes_to_b58(bytes(key2.getPublicKey().toBytes())),
+                    "publicKeyBase58": bytes_to_b58(bytes(key2.public_key().to_bytes_raw())),
                     "type": key2_type,
                 },
             ],
@@ -392,21 +396,21 @@ class TestDidDocument:
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationMethodEvent(
-                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.getPublicKey(), key1_type
+                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.public_key(), key1_type
                 ),
             ),
             HcsDidMessage(
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-2", key2.getPublicKey(), IDENTIFIER_2, "capabilityDelegation", key2_type
+                    f"{IDENTIFIER_2}#key-2", key2.public_key(), IDENTIFIER_2, "capabilityDelegation", key2_type
                 ),
             ),
             HcsDidMessage(
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-3", key3.getPublicKey(), IDENTIFIER_2, "authentication", key3_type
+                    f"{IDENTIFIER_2}#key-3", key3.public_key(), IDENTIFIER_2, "authentication", key3_type
                 ),
             ),
             HcsDidMessage(
@@ -418,14 +422,14 @@ class TestDidDocument:
                 DidDocumentOperation.UPDATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationMethodEvent(
-                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key4.getPublicKey(), key4_type
+                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key4.public_key(), key4_type
                 ),
             ),
             HcsDidMessage(
                 DidDocumentOperation.UPDATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-2", key5.getPublicKey(), IDENTIFIER_2, "capabilityDelegation", key5_type
+                    f"{IDENTIFIER_2}#key-2", key5.public_key(), IDENTIFIER_2, "capabilityDelegation", key5_type
                 ),
             ),
         ]
@@ -462,19 +466,19 @@ class TestDidDocument:
                 {
                     "controller": IDENTIFIER_2,
                     "id": f"{IDENTIFIER_2}#key-1",
-                    "publicKeyBase58": bytes_to_b58(bytes(key4.getPublicKey().toBytes())),
+                    "publicKeyBase58": bytes_to_b58(bytes(key4.public_key().to_bytes_raw())),
                     "type": key4_type,
                 },
                 {
                     "controller": IDENTIFIER_2,
                     "id": f"{IDENTIFIER_2}#key-2",
-                    "publicKeyBase58": bytes_to_b58(bytes(key5.getPublicKey().toBytes())),
+                    "publicKeyBase58": bytes_to_b58(bytes(key5.public_key().to_bytes_raw())),
                     "type": key5_type,
                 },
                 {
                     "controller": IDENTIFIER_2,
                     "id": f"{IDENTIFIER_2}#key-3",
-                    "publicKeyBase58": bytes_to_b58(bytes(key3.getPublicKey().toBytes())),
+                    "publicKeyBase58": bytes_to_b58(bytes(key3.public_key().to_bytes_raw())),
                     "type": key3_type,
                 },
             ],
@@ -518,21 +522,21 @@ class TestDidDocument:
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationMethodEvent(
-                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.getPublicKey(), key1_type
+                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.public_key(), key1_type
                 ),
             ),
             HcsDidMessage(
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-2", key2.getPublicKey(), IDENTIFIER_2, "capabilityDelegation", key2_type
+                    f"{IDENTIFIER_2}#key-2", key2.public_key(), IDENTIFIER_2, "capabilityDelegation", key2_type
                 ),
             ),
             HcsDidMessage(
                 DidDocumentOperation.CREATE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-3", key3.getPublicKey(), IDENTIFIER_2, "authentication", key3_type
+                    f"{IDENTIFIER_2}#key-3", key3.public_key(), IDENTIFIER_2, "authentication", key3_type
                 ),
             ),
             HcsDidMessage(
@@ -544,14 +548,14 @@ class TestDidDocument:
                 DidDocumentOperation.REVOKE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationMethodEvent(
-                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.getPublicKey(), key1_type
+                    f"{IDENTIFIER_2}#key-1", IDENTIFIER_2, key1.public_key(), key1_type
                 ),
             ),
             HcsDidMessage(
                 DidDocumentOperation.REVOKE,
                 IDENTIFIER_2,
                 HcsDidUpdateVerificationRelationshipEvent(
-                    f"{IDENTIFIER_2}#key-2", key2.getPublicKey(), IDENTIFIER_2, "capabilityDelegation", key2_type
+                    f"{IDENTIFIER_2}#key-2", key2.public_key(), IDENTIFIER_2, "capabilityDelegation", key2_type
                 ),
             ),
         ]
@@ -582,7 +586,7 @@ class TestDidDocument:
                 {
                     "controller": IDENTIFIER_2,
                     "id": f"{IDENTIFIER_2}#key-3",
-                    "publicKeyBase58": bytes_to_b58(bytes(key3.getPublicKey().toBytes())),
+                    "publicKeyBase58": bytes_to_b58(bytes(key3.public_key().to_bytes_raw())),
                     "type": key3_type,
                 },
             ],

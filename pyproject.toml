@@ -14,10 +14,9 @@ packages = [
 aiohttp = "^3.10.9"
 aiohttp_retry = "^2.9.0"
 python = ">=3.12,<4.0"
-pyjnius = ">=1.5.0"
 did-resolver = "0.0.3"
 base58 = "^2.1.1"
-hedera-sdk-py = { git = "https://github.com/DSRCorporation/hedera-sdk-py", branch = "feature/update-java-sdk" }
+hedera_sdk_python = "0.0.0.dev5"
 zstandard = "^0.23.0"
 
 [tool.poetry.group.dev.dependencies]
@@ -45,7 +44,7 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.pyright]
-include = ["did_sdk_py"]
+include = ["did_sdk_py", "tests"]
 venvPath = "."
 venv = ".venv"
 executionEnvironments = [
