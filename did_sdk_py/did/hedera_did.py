@@ -5,6 +5,7 @@ from hedera_sdk_python import Client, PrivateKey, PublicKey, TopicMessageSubmitT
 from hedera_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import HcsMessageResolver, HcsMessageTransaction, HcsTopicOptions, HcsTopicService
+from ..hcs.constants import MAX_TRANSACTION_FEE
 from ..utils.encoding import multibase_encode
 from ..utils.keys import get_key_type
 from .did_document import DidDocument
@@ -318,8 +319,7 @@ class HederaDid:
         envelope.sign(self._private_key)
 
         def build_did_transaction(message_submit_transaction: TopicMessageSubmitTransaction) -> Transaction:
-            # FIXME: Find a way to properly set transaction fee
-            # message_submit_transaction.transaction_fee = 2
+            message_submit_transaction.transaction_fee = MAX_TRANSACTION_FEE.to_tinybars()  # pyright: ignore [reportAttributeAccessIssue]
             return message_submit_transaction.freeze_with(self._client).sign(self._private_key)
 
         await HcsMessageTransaction(self.topic_id, envelope, build_did_transaction).execute(self._client)

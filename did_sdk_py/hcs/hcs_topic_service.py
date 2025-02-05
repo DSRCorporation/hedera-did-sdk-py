@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from hedera_sdk_python import (
     Client,
+    Hbar,
     PrivateKey,
     PublicKey,
     TopicCreateTransaction,
@@ -11,6 +12,7 @@ from hedera_sdk_python import (
 )
 from hedera_sdk_python.consensus.topic_info import TopicInfo
 
+from .constants import MAX_TRANSACTION_FEE
 from .utils import execute_hcs_query_async, execute_hcs_transaction_async, sign_hcs_transaction_async
 
 TopicTransaction = TopicCreateTransaction | TopicUpdateTransaction
@@ -31,12 +33,11 @@ def _set_topic_transaction_options(transaction: TopicTransaction, topic_options:
     if topic_options.topic_memo:
         transaction.set_memo(topic_options.topic_memo)
 
-    # max_transaction_fee = (
-    #     Hbar(topic_options.max_transaction_fee_hbar) if topic_options.max_transaction_fee_hbar else MAX_TRANSACTION_FEE
-    # )
+    max_transaction_fee = (
+        Hbar(topic_options.max_transaction_fee_hbar) if topic_options.max_transaction_fee_hbar else MAX_TRANSACTION_FEE
+    )
 
-    # FIXME: Find a way to properly set transaction fee
-    # transaction.transaction_fee = max_transaction_fee
+    transaction.transaction_fee = max_transaction_fee.to_tinybars()
     transaction.set_submit_key(topic_options.submit_key)
 
     return transaction

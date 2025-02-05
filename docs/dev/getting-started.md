@@ -6,7 +6,7 @@
 
 ## Install from PyPi
 
-TODO: update package namespace
+TODO: update package namespace once moved to Hiero
 
 ```bash
 pip install hedera-did-sdk-py

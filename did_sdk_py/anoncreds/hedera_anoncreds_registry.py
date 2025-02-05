@@ -14,6 +14,7 @@ from ..hcs import (
     HcsTopicOptions,
     HcsTopicService,
 )
+from ..hcs.constants import MAX_TRANSACTION_FEE
 from ..utils.cache import Cache, MemoryCache
 from .models import (
     AnonCredsCredDef,
@@ -611,8 +612,7 @@ class HederaAnonCredsRegistry:
         def build_message_submit_transaction(
             message_submit_transaction: TopicMessageSubmitTransaction,
         ) -> Transaction:
-            # FIXME: Find a way to properly set transaction fee
-            # message_submit_transaction.transaction_fee = 2
+            message_submit_transaction.transaction_fee = MAX_TRANSACTION_FEE.to_tinybars()  # pyright: ignore [reportAttributeAccessIssue]
             return message_submit_transaction.freeze_with(self._client).sign(PrivateKey.from_string(issuer_key_der))
 
         await HcsMessageTransaction(entries_topic_id, entry_message, build_message_submit_transaction).execute(

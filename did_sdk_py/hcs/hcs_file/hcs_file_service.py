@@ -6,6 +6,7 @@ from typing import cast
 from hedera_sdk_python import Client, PrivateKey, TopicMessageSubmitTransaction
 from hedera_sdk_python.transaction.transaction import Transaction
 
+from ..constants import MAX_TRANSACTION_FEE
 from ..hcs_message_resolver import HcsMessageResolver
 from ..hcs_message_transaction import HcsMessageTransaction
 from ..hcs_topic_service import HcsTopicOptions, HcsTopicService
@@ -44,8 +45,7 @@ class HcsFileService:
                 def build_message_submit_transaction(
                     message_submit_transaction: TopicMessageSubmitTransaction,
                 ) -> Transaction:
-                    # TODO: Deal with conversion
-                    # message_submit_transaction.transaction_fee = MAX_TRANSACTION_FEE
+                    message_submit_transaction.transaction_fee = MAX_TRANSACTION_FEE.to_tinybars()  # pyright: ignore [reportAttributeAccessIssue]
                     return message_submit_transaction.freeze_with(self._client).sign(submit_key)
 
                 await HcsMessageTransaction(topic_id, message, build_message_submit_transaction).execute(self._client)

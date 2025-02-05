@@ -27,6 +27,7 @@ class HcsTopicListener:
         self._query = (
             TopicMessageQuery(topic_id=TopicId.from_string(topic_id), start_time=Timestamp(0, 0).to_date())
             # Not implemented in native SDK
+            # See GH issue: https://github.com/hiero-ledger/hiero-sdk-python/issues/43
             # .setMaxBackoff(JDuration.ofMillis(2000))
             # .setMaxAttempts(5)
         )
@@ -45,6 +46,7 @@ class HcsTopicListener:
 
     def set_completion_handler(self, completion_handler: Callable[[], None]):
         # Not implemented in native SDK
+        # See GH issue: https://github.com/hiero-ledger/hiero-sdk-python/issues/43
         # self._query.setCompletionHandler(completion_handler)
         return self
 
@@ -66,6 +68,7 @@ class HcsTopicListener:
             self._handle_response(response, receiver)
 
         # Subscription handle is not actually implemented in native SDK
+        # See GH issue: https://github.com/hiero-ledger/hiero-sdk-python/issues/43
         self._subscription_handle = self._query.subscribe(client, handle_message, error_handler)
 
     def unsubscribe(self):
