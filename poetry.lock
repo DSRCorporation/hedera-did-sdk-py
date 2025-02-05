@@ -919,13 +919,15 @@ protobuf = ">=5.26.1,<6.0dev"
 setuptools = "*"
 
 [[package]]
-name = "hedera_sdk_python"
-version = "0.1.5.dev9+g2571ffb.d20250204"
+name = "hedera-sdk-python"
+version = "0.0.0.dev5"
 description = "A Hiero SDK in pure Python"
 optional = false
 python-versions = ">=3.9.2"
-files = []
-develop = true
+files = [
+    {file = "hedera_sdk_python-0.0.0.dev5-py3-none-any.whl", hash = "sha256:7db96241ee47690638f19c3c7986d1784e0c1232906926777f1bbc0aae55b72e"},
+    {file = "hedera_sdk_python-0.0.0.dev5.tar.gz", hash = "sha256:2d7d3515e9dac7de13d0b953210d98ea35103b327d953e1a0c9d7ee34c113b69"},
+]
 
 [package.dependencies]
 cryptography = "44.0.0"
@@ -934,10 +936,6 @@ grpcio-tools = "1.68.1"
 protobuf = "5.28.1"
 python-dotenv = "1.0.1"
 requests = "2.32.3"
-
-[package.source]
-type = "directory"
-url = "../hedera_sdk_python_fork"
 
 [[package]]
 name = "identify"
@@ -2394,4 +2392,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<4.0"
-content-hash = "108c68484c173ef199da99aa057a57cb7f5c90df91343b87d7844ec5454fd245"
+content-hash = "cfd5cabe68fb8c7ae448a13296da259a273ea105f80216026d79fdb95d8e5f2b"
