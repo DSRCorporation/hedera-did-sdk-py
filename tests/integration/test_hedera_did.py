@@ -3,7 +3,7 @@ import re
 from typing import cast
 
 import pytest
-from hedera_sdk_python import Client, PrivateKey, PublicKey
+from hiero_sdk_python import Client, PrivateKey, PublicKey
 
 from did_sdk_py import DidException, HederaDid
 from did_sdk_py.did.hcs import HcsDidMessageEnvelope

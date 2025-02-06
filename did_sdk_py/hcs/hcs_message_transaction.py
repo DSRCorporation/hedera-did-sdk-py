@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
-from hedera_sdk_python import Client, TopicId, TopicMessageSubmitTransaction
-from hedera_sdk_python.transaction.transaction import Transaction
+from hiero_sdk_python import Client, TopicId, TopicMessageSubmitTransaction
+from hiero_sdk_python.transaction.transaction import Transaction
 
 from .hcs_message import HcsMessage
 from .utils import execute_hcs_transaction_async

@@ -3,8 +3,8 @@ import re
 from hashlib import sha256
 from typing import cast
 
-from hedera_sdk_python import Client, PrivateKey, TopicMessageSubmitTransaction
-from hedera_sdk_python.transaction.transaction import Transaction
+from hiero_sdk_python import Client, PrivateKey, TopicMessageSubmitTransaction
+from hiero_sdk_python.transaction.transaction import Transaction
 
 from ..constants import MAX_TRANSACTION_FEE
 from ..hcs_message_resolver import HcsMessageResolver

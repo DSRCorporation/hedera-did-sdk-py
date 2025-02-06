@@ -3,7 +3,7 @@ from hashlib import sha256
 from pathlib import Path
 
 import pytest
-from hedera_sdk_python import Client, TopicId, TopicInfoQuery
+from hiero_sdk_python import Client, TopicId, TopicInfoQuery
 
 from did_sdk_py.hcs import HcsFileChunkMessage, HcsFileService, HcsMessageResolver, execute_hcs_query_async
 

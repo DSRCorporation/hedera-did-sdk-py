@@ -1,7 +1,7 @@
 from unittest.mock import NonCallableMagicMock
 
 import pytest
-from hedera_sdk_python import Client
+from hiero_sdk_python import Client
 from pytest_mock import MockerFixture
 
 from did_sdk_py.hcs import HcsTopicOptions, HcsTopicService

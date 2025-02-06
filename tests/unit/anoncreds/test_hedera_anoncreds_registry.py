@@ -2,7 +2,7 @@ import time
 from unittest.mock import NonCallableMagicMock, call
 
 import pytest
-from hedera_sdk_python import Client, Timestamp
+from hiero_sdk_python import Client, Timestamp
 from pytest_mock import MockerFixture
 
 from did_sdk_py import (

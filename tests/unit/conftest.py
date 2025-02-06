@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 import pytest
-from hedera_sdk_python import Client, PrivateKey, PublicKey
+from hiero_sdk_python import Client, PrivateKey, PublicKey
 from pytest_mock import MockerFixture
 
 from did_sdk_py.did.types import SupportedKeyType
@@ -21,7 +21,7 @@ class TestKey:
 
 @pytest.fixture
 def mock_client(mocker: MockerFixture):
-    MockHederaClientProvider = mocker.patch("hedera_sdk_python.Client", autospec=Client)
+    MockHederaClientProvider = mocker.patch("hiero_sdk_python.Client", autospec=Client)
     return MockHederaClientProvider.return_value
 
 

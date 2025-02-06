@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from hashlib import sha256
 
-from hedera_sdk_python import Timestamp
+from hiero_sdk_python import Timestamp
 
 from ..utils.serializable import Serializable
 

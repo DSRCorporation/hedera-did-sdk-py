@@ -23,7 +23,7 @@ Configuration consists from two parts:
 #### Create client for Testnet and set operator config
 
 ```python
-from hedera_sdk_python import Client, Network, AccountId, PrivateKey
+from hiero_sdk_python import Client, Network, AccountId, PrivateKey
 
 client = Client(
     network=Network("testnet")
@@ -35,7 +35,7 @@ client.set_operator(AccountId.from_string("OPERATOR_ID"), private_key=PrivateKey
 #### Create client provider with custom network config
 
 ```python
-from hedera_sdk_python import Client, Network, AccountId, PrivateKey
+from hiero_sdk_python import Client, Network, AccountId, PrivateKey
 
 TESTNET_NODES = [
     ("0.testnet.hedera.com:50211", AccountId(0, 0, 3)),

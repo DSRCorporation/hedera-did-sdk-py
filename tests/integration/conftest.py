@@ -1,7 +1,7 @@
 import os
 
 import pytest
-from hedera_sdk_python import AccountId, Client, Network, PrivateKey
+from hiero_sdk_python import AccountId, Client, Network, PrivateKey
 
 from did_sdk_py.utils.keys import get_key_type
 

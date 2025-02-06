@@ -1,4 +1,4 @@
-from hedera_sdk_python import PrivateKey
+from hiero_sdk_python import PrivateKey
 
 from did_sdk_py.utils.encoding import multibase_encode
 
