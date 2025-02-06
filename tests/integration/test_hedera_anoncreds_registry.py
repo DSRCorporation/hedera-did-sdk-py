@@ -2,7 +2,7 @@ import asyncio
 import time
 
 import pytest
-from hedera_sdk_python import Client
+from hiero_sdk_python import Client
 
 from did_sdk_py import (
     AnonCredsCredDef,

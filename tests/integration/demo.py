@@ -3,7 +3,7 @@ import json
 import time
 
 import pytest
-from hedera_sdk_python import Client, PrivateKey
+from hiero_sdk_python import Client, PrivateKey
 
 from did_sdk_py import (
     AnonCredsCredDef,

@@ -1,7 +1,7 @@
 import asyncio
 
 import pytest
-from hedera_sdk_python import Client
+from hiero_sdk_python import Client
 
 from did_sdk_py import HederaDid, HederaDidResolver
 from did_sdk_py.utils.encoding import bytes_to_b58

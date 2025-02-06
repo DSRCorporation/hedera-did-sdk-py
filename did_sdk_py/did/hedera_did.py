@@ -1,8 +1,8 @@
 import logging
 from typing import Literal, cast
 
-from hedera_sdk_python import Client, PrivateKey, PublicKey, TopicMessageSubmitTransaction
-from hedera_sdk_python.transaction.transaction import Transaction
+from hiero_sdk_python import Client, PrivateKey, PublicKey, TopicMessageSubmitTransaction
+from hiero_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import HcsMessageResolver, HcsMessageTransaction, HcsTopicOptions, HcsTopicService
 from ..hcs.constants import MAX_TRANSACTION_FEE

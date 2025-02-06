@@ -24,7 +24,7 @@ For more complex examples, please refer to SDK integration tests:
 ### Create Hedera Client (for testnet)
 
 ```python
-from hedera_sdk_python import Client, Network, AccountId, PrivateKey
+from hiero_sdk_python import Client, Network, AccountId, PrivateKey
 
 client = Client(
     network=Network("testnet")

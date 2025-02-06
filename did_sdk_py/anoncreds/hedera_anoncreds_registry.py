@@ -3,8 +3,8 @@ from collections.abc import Sequence
 from itertools import chain
 from typing import cast
 
-from hedera_sdk_python import Client, PrivateKey, Timestamp, TopicMessageSubmitTransaction
-from hedera_sdk_python.transaction.transaction import Transaction
+from hiero_sdk_python import Client, PrivateKey, Timestamp, TopicMessageSubmitTransaction
+from hiero_sdk_python.transaction.transaction import Transaction
 
 from ..hcs import (
     HcsFileService,

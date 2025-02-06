@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from hedera_sdk_python import (
+from hiero_sdk_python import (
     Client,
     Hbar,
     PrivateKey,
@@ -10,7 +10,7 @@ from hedera_sdk_python import (
     TopicInfoQuery,
     TopicUpdateTransaction,
 )
-from hedera_sdk_python.consensus.topic_info import TopicInfo
+from hiero_sdk_python.consensus.topic_info import TopicInfo
 
 from .constants import MAX_TRANSACTION_FEE
 from .utils import execute_hcs_query_async, execute_hcs_transaction_async, sign_hcs_transaction_async

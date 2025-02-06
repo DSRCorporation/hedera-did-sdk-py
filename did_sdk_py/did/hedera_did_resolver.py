@@ -3,7 +3,7 @@ import time
 from enum import StrEnum
 from typing import cast
 
-from hedera_sdk_python import Client, Timestamp
+from hiero_sdk_python import Client, Timestamp
 
 from ..did.utils import parse_identifier
 from ..hcs.hcs_message_resolver import HcsMessageResolver

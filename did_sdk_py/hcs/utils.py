@@ -1,9 +1,9 @@
 import asyncio
 from typing import Any
 
-from hedera_sdk_python import Client, PrivateKey, TransactionReceipt
-from hedera_sdk_python.query.query import Query
-from hedera_sdk_python.transaction.transaction import Transaction
+from hiero_sdk_python import Client, PrivateKey, TransactionReceipt
+from hiero_sdk_python.query.query import Query
+from hiero_sdk_python.transaction.transaction import Transaction
 
 
 async def sign_hcs_transaction_async(transaction: Transaction, signing_keys: list[PrivateKey]) -> Transaction:

@@ -1,4 +1,4 @@
-from hedera_sdk_python import PrivateKey, PublicKey
+from hiero_sdk_python import PrivateKey, PublicKey
 
 from ..did.types import SupportedKeyType
 
